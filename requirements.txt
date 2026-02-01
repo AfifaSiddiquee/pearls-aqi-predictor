@@ -1,6 +1,8 @@
-mlflow
-dagshub
 pandas
 numpy
 scikit-learn
+mlflow
+dagshub
 tensorflow
+hopsworks
+requests
