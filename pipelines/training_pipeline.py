@@ -1,271 +1,104 @@
 import os
 import hopsworks
-
-project = hopsworks.login(
-    api_key_value=os.getenv("HOPSWORKS_API_KEY")
-)
-
-fs = project.get_feature_store()
-fg = fs.get_feature_group("aqi_features", version=1)
-
-# If the feature group exists, ensure it's deleted for a clean slate
-# This is crucial for fixing schema inconsistencies
-if fg:
-    print(f"Deleting existing feature group 'aqi_features' version {fg.version}...")
-    fg.delete()
-    print("Feature group deleted successfully.")
-
-# Re-create the feature group. Schema will be inferred from the first insert.
-feature_group = fs.create_feature_group(
-    name="aqi_features",
-    version=1,
-    primary_key=["timestamp"],
-    description="Clean AQI historical features",
-    online_enabled=False
-)
-
-# Re-insert the cleaned DataFrame (df should already be without 'city' column)
-# Assuming df is available from previous cells and has 'city' dropped
-feature_group.insert(df, write_options={"wait_for_job": True})
-print("Data re-inserted successfully into new feature group.")
-
-# Now try to read again from the freshly created and populated feature group
-fg = fs.get_feature_group("aqi_features", version=1)
-df_features = fg.read()
-
-df_features.head()
-
-"""**Split features & target**"""
-
-X = df_features.drop(columns=["aqi", "timestamp"])
-y = df_features["aqi"]
-
-"""**Step 4 — Train 3 Models**"""
-
-# Use first 80% as train, last 20% as test
-split_index = int(len(X) * 0.8)
-
-X_train, X_test = X.iloc[:split_index], X.iloc[split_index:]
-y_train, y_test = y.iloc[:split_index], y.iloc[split_index:]
-
-print(f"Train shape: {X_train.shape}, Test shape: {X_test.shape}")
-
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.linear_model import Ridge, Lasso
-from xgboost import XGBRegressor
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
 import mlflow
 import mlflow.sklearn
 import mlflow.tensorflow
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import numpy as np
 
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from xgboost import XGBRegressor
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from mlflow.tracking import MlflowClient
+
+
+
 def evaluate(y_true, y_pred):
-    rmse = np.sqrt(mean_squared_error(y_true, y_pred))  # manually sqrt
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     mae = mean_absolute_error(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
     return {"rmse": rmse, "mae": mae, "r2": r2}
 
-!pip install mlflow
-
-"""**Model 1 : Random Forest**"""
-
-with mlflow.start_run(run_name="RandomForest"):
-    rf = RandomForestRegressor(n_estimators=100, random_state=42)
-    rf.fit(X_train, y_train)
-    preds = rf.predict(X_test)
-
-    metrics = evaluate(y_test, preds)
-    mlflow.log_params({"model": "RandomForest", "n_estimators": 100})
-    mlflow.log_metrics(metrics)
-    mlflow.sklearn.log_model(rf, "model")
-    rf_run_id = mlflow.active_run().info.run_id
-    print("Random Forest metrics:", metrics)
-
-"""**Model 2 :  Ridge Regression**"""
-
-with mlflow.start_run(run_name="Ridge"):
-    ridge = Ridge(alpha=1.0)
-    ridge.fit(X_train, y_train)
-    preds = ridge.predict(X_test)
-
-    metrics = evaluate(y_test, preds)
-    mlflow.log_params({"model": "Ridge", "alpha": 1.0})
-    mlflow.log_metrics(metrics)
-    mlflow.sklearn.log_model(ridge, "model")
-    ridge_run_id = mlflow.active_run().info.run_id
-    print("Ridge Regression metrics:", metrics)
-
-"""**Model 3 : Neural Network (TensorFlow)**"""
-
-with mlflow.start_run(run_name="NeuralNet"):
-    nn = Sequential([
-        Dense(64, activation="relu", input_shape=(X_train.shape[1],)),
-        Dense(32, activation="relu"),
-        Dense(1)
-    ])
-    nn.compile(optimizer="adam", loss="mse")
-    nn.fit(X_train, y_train, epochs=20, verbose=0)
-
-    preds = nn.predict(X_test).flatten()
-    metrics = evaluate(y_test, preds)
-
-    mlflow.log_params({"model": "NeuralNet", "epochs": 20})
-    mlflow.log_metrics(metrics)
-    mlflow.tensorflow.log_model(nn, "model")
-    nn_run_id = mlflow.active_run().info.run_id
-    print("Neural Network metrics:", metrics)
-
-"""**Model 4 : Gradient Boosting Regressor**"""
-
-with mlflow.start_run(run_name="GradientBoosting"):
-    gb = GradientBoostingRegressor(n_estimators=200, learning_rate=0.1, random_state=42)
-    gb.fit(X_train, y_train)
-    preds = gb.predict(X_test)
-
-    metrics = evaluate(y_test, preds)
-    mlflow.log_params({"model": "GradientBoosting", "n_estimators": 200, "learning_rate": 0.1})
-    mlflow.log_metrics(metrics)
-    mlflow.sklearn.log_model(gb, "model")
-    gb_run_id = mlflow.active_run().info.run_id
-    print("Gradient Boosting metrics:", metrics)
-
-"""**Model 5 : XGBoost Regressor**"""
-
-with mlflow.start_run(run_name="XGBoost"):
-    xgb = XGBRegressor(n_estimators=200, learning_rate=0.1, random_state=42, objective='reg:squarederror')
-    xgb.fit(X_train, y_train)
-    preds = xgb.predict(X_test)
-
-    metrics = evaluate(y_test, preds)
-    mlflow.log_params({"model": "XGBoost", "n_estimators": 200, "learning_rate": 0.1})
-    mlflow.log_metrics(metrics)
-    mlflow.sklearn.log_model(xgb, "model")
-    xgb_run_id = mlflow.active_run().info.run_id
-    print("XGBoost metrics:", metrics)
-
-"""**Step 5 : Compare Models & Select Best**"""
-
-# Manually or automatically select best model by lowest RMSE
-all_metrics = {
-    "RandomForest": (rf_run_id, evaluate(y_test, rf.predict(X_test))),
-    "Ridge": (ridge_run_id, evaluate(y_test, ridge.predict(X_test))),
-    "NeuralNet": (nn_run_id, evaluate(y_test, nn.predict(X_test).flatten())),
-    "GradientBoosting": (gb_run_id, evaluate(y_test, gb.predict(X_test))),
-    "XGBoost": (xgb_run_id, evaluate(y_test, xgb.predict(X_test)))
-}
-
-for model_name, (run_id, metric) in all_metrics.items():
-    print(f"{model_name}: RMSE={metric['rmse']:.2f}, MAE={metric['mae']:.2f}, R2={metric['r2']:.2f}")
-
-# Example: select model with lowest RMSE
-best_model_name = min(all_metrics, key=lambda k: all_metrics[k][1]['rmse'])
-best_run_id = all_metrics[best_model_name][0]
-print(f"Best model selected: {best_model_name}, run_id={best_run_id}")
-
-"""## **Interpretation**:
-**Why Gradient Boosting is selected as best:**
-
-**1.   Lowest RMSE & MAE (almost tied with Random Forest):**
-
-*    RMSE = 0.06, MAE = 0.02 → predictions are extremely close to actual AQI values.
-
-*    RMSE measures overall error magnitude; MAE measures average absolute deviation. Both are very small.
-
-**2.   R² = 1.00:**
-
-*    Indicates the model explains 100% of the variance in AQI values.
-
-*    Random Forest also has R² = 1.00, so they are very similar.
-
-**3.   Consistency:**
-
-*    Gradient Boosting often handles small variations and non-linear patterns slightly better than Random Forest, especially for feature interactions.
 
 
+def run_training_pipeline():
 
-**Other models:**
+    # 1️⃣ Connect to Hopsworks
+    project = hopsworks.login(api_key_value=os.getenv("HOPSWORKS_API_KEY"))
+    fs = project.get_feature_store()
 
-**Ridge Regression:** Linear model; worse RMSE (0.39) and R² (0.87) → misses non-linear interactions between pollutants/time features.
+    fg = fs.get_feature_group("aqi_features", version=1)
+    df = fg.read()
 
-**Neural Network:** RMSE 0.66, R² 0.63 → underfitting (probably due to small data, insufficient epochs, or simple architecture).
+    # 2️⃣ Split features & target
+    X = df.drop(columns=["aqi", "timestamp"])
+    y = df["aqi"]
 
-**XGBoost:** RMSE 0.10, R² 0.99 → very good but slightly higher RMSE than Gradient Boosting in this run.
+    split = int(len(X) * 0.8)
+    X_train, X_test = X.iloc[:split], X.iloc[split:]
+    y_train, y_test = y.iloc[:split], y.iloc[split:]
 
-The **accuracy** is extremely good for this dataset. RMSE of 0.06 on AQI values that range 1–5 (OpenWeather AQI scale) is almost perfect.
-"""
+    # 3️⃣ Train models
+    all_metrics = {}
 
-import mlflow
+    with mlflow.start_run(run_name="RandomForest"):
+        rf = RandomForestRegressor(n_estimators=100, random_state=42)
+        rf.fit(X_train, y_train)
+        preds = rf.predict(X_test)
+        metrics = evaluate(y_test, preds)
+        mlflow.log_metrics(metrics)
+        mlflow.sklearn.log_model(rf, "model")
+        all_metrics["RandomForest"] = (mlflow.active_run().info.run_id, metrics)
 
-!pip install dagshub mlflow
+    with mlflow.start_run(run_name="Ridge"):
+        ridge = Ridge(alpha=1.0)
+        ridge.fit(X_train, y_train)
+        preds = ridge.predict(X_test)
+        metrics = evaluate(y_test, preds)
+        mlflow.log_metrics(metrics)
+        mlflow.sklearn.log_model(ridge, "model")
+        all_metrics["Ridge"] = (mlflow.active_run().info.run_id, metrics)
 
-"""**Step 6 : Log & Register Best Model in DagsHub**"""
+    with mlflow.start_run(run_name="NeuralNet"):
+        nn = Sequential([
+            Dense(64, activation="relu", input_shape=(X_train.shape[1],)),
+            Dense(32, activation="relu"),
+            Dense(1)
+        ])
+        nn.compile(optimizer="adam", loss="mse")
+        nn.fit(X_train, y_train, epochs=20, verbose=0)
+        preds = nn.predict(X_test).flatten()
+        metrics = evaluate(y_test, preds)
+        mlflow.log_metrics(metrics)
+        mlflow.tensorflow.log_model(nn, "model")
+        all_metrics["NeuralNet"] = (mlflow.active_run().info.run_id, metrics)
 
-from mlflow.tracking import MlflowClient
-from mlflow.exceptions import MlflowException
-import mlflow
-import os
+    # 4️⃣ Select best model
+    best_model = min(all_metrics, key=lambda k: all_metrics[k][1]["rmse"])
+    best_run_id = all_metrics[best_model][0]
 
-# 2. Set MLflow tracking URI
-mlflow.set_tracking_uri("https://dagshub.com/AfifaSiddiquee/AQIPredictorProject.mlflow/")
+    # 5️⃣ Register best model
+    mlflow.set_tracking_uri("https://dagshub.com/AfifaSiddiquee/AQIPredictorProject.mlflow/")
+    client = MlflowClient()
 
-# 3. Initialize MLflow client
-client = MlflowClient()
+    MODEL_NAME = "AQI_Predictor_Best"
+    model_uri = f"runs:/{best_run_id}/model"
 
-# 4. Best model info
-MODEL_NAME = "AQI_Predictor_Best"
-model_uri = f"runs:/{best_run_id}/model"
-
-# 5. Register the model
-try:
-    # Try creating the registered model (first time only)
-    client.create_registered_model(MODEL_NAME)
-    print(f"Registered model '{MODEL_NAME}' created.")
-except MlflowException as e:
-    if "RESOURCE_ALREADY_EXISTS" in str(e):
-        print(f"Registered model '{MODEL_NAME}' already exists. Creating new version...")
-    else:
-        raise e
-
-# Create a new version of the model
-model_version = client.create_model_version(
-    name=MODEL_NAME,
-    source=model_uri,
-    run_id=best_run_id
-)
-
-print(f"Best model registered successfully!")
-print(f"Version: {model_version.version}, Run ID: {model_version.run_id}, Status: {model_version.status}")
-
-from mlflow.tracking import MlflowClient
-
-client = MlflowClient()
-
-MODEL_NAME = "AQI_Predictor_Best"
-
-# List all versions
-versions = client.search_model_versions(f"name='{MODEL_NAME}'")
-
-if not versions:
-    print(f"No registered model versions found for '{MODEL_NAME}'.")
-else:
-    # Sort versions by version number in descending order to get the latest
-    versions.sort(key=lambda mv: int(mv.version), reverse=True)
-    best_version = versions[0]  # This is now reliably the latest version
-
-    print(f"Best model version: {best_version.version}")
-    print(f"Run ID stored in version: {best_version.run_id}")
-    print(f"Status: {best_version.status}")
-    print(f"Artifact source: {best_version.source}")
-
-    # List logged artifacts (metrics, model files, etc.)
     try:
-        artifacts = client.list_artifacts(best_version.run_id)
-        print("Artifacts in best run version:")
-        for a in artifacts:
-            print(a.path)
-    except Exception as e:
-        print(f"Error listing artifacts for run ID {best_version.run_id}: {e}")
-        print("This often happens if the original MLflow run, which logged these artifacts, is no longer accessible on the tracking server.")
-        print("You might need to ensure the original run is preserved or re-log the model if the artifacts are missing.")
+        client.create_registered_model(MODEL_NAME)
+    except:
+        pass
+
+    client.create_model_version(
+        name=MODEL_NAME,
+        source=model_uri,
+        run_id=best_run_id
+    )
+
+    print(f"Best model registered: {best_model}")
+
+
+if __name__ == "__main__":
+    run_training_pipeline()
