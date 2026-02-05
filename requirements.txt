@@ -5,5 +5,6 @@ mlflow
 dagshub
 tensorflow
 
-hopsworks==4.2.10
+hopsworks==3.7.9
 hsfs==3.7.9
+
