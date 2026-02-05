@@ -13,7 +13,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from mlflow.tracking import MlflowClient
 
-
+mlflow.set_tracking_uri("https://dagshub.com/AfifaSiddiquee/AQIPredictorProject.mlflow/")
 
 def evaluate(y_true, y_pred):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
@@ -80,7 +80,6 @@ def run_training_pipeline():
     best_run_id = all_metrics[best_model][0]
 
     # 5️⃣ Register best model
-    mlflow.set_tracking_uri("https://dagshub.com/AfifaSiddiquee/AQIPredictorProject.mlflow/")
     client = MlflowClient()
 
     MODEL_NAME = "AQI_Predictor_Best"
