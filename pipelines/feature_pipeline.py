@@ -1,41 +1,47 @@
+import os
+import sys
+from datetime import datetime, timedelta
 import pandas as pd
 import hopsworks
-from datetime import datetime
-
 from src.ingestion.fetch_aqi import fetch_aqi
-
+from src.ingestion.fetch_historical_aqi import fetch_historical_aqi
 
 def run_feature_pipeline():
+    # Connect to Hopsworks project
+    project = hopsworks.login()
+    fs = project.get_feature_store()  # Should now work with hopsworks==4.2.*
+
+    # Define feature group
+    fg_name = "karachi_aqi_features"
     try:
-        print("Fetching AQI...")
-        record = fetch_aqi()
-        print("Record fetched:", record)
-
-        # Convert single record to DataFrame
-        df = pd.DataFrame([record])
-
-        print("Connecting to Hopsworks...")
-        project = hopsworks.login()
-        fs = project.get_feature_store()
-
-        # Feature Group definition
-        feature_group = fs.get_or_create_feature_group(
-            name="aqi_features",
+        fg = fs.get_feature_group(fg_name)
+        print("Feature group exists. Appending new data...")
+    except Exception:
+        fg = fs.create_feature_group(
+            name=fg_name,
             version=1,
+            description="AQI and pollutant data for Karachi",
             primary_key=["city", "timestamp"],
-            description="Daily AQI and pollutant features for Karachi",
-            online_enabled=False
+            event_time="timestamp"
         )
+        print("Feature group created.")
 
-        print("Inserting data into Feature Store...")
-        feature_group.insert(df, write_options={"wait_for_job": True})
+    # 1️⃣ Fetch historical data (6 months) if feature group empty
+    if fg.read().empty:
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=180)
+        print("Fetching 6 months historical AQI data...")
+        df_hist = fetch_historical_aqi(start_date, end_date)
+        if not df_hist.empty:
+            fg.insert(df_hist, write_options={"wait_for_job": True})
+            print("Historical data inserted.")
 
-        print("✅ Feature pipeline completed successfully")
-
-    except Exception as e:
-        print("🚨 Feature pipeline failed:", e)
-        raise
-
+    # 2️⃣ Fetch latest daily data and append
+    print("Fetching latest AQI data...")
+    latest_record = fetch_aqi()
+    df_latest = pd.DataFrame([latest_record])
+    fg.insert(df_latest, write_options={"wait_for_job": True})
+    print("Latest data appended to feature group.")
 
 if __name__ == "__main__":
     run_feature_pipeline()
