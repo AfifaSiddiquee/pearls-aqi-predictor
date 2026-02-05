@@ -23,5 +23,6 @@ jobs:
         env:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          PYTHONPATH: ${{ github.workspace }}
         run: python -u pipelines/feature_pipeline.py
 
