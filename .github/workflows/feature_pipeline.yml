@@ -1,28 +1,31 @@
-name: Feature Pipeline (Hourly)
+name: Feature Pipeline
 
 on:
+  push:
+    branches:
+      - main
   schedule:
-    - cron: "0 * * * *"  # every hour
-  workflow_dispatch:
+    - cron: "0 0 * * *"  # runs daily at midnight UTC
 
 jobs:
   feature-pipeline:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repo
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      # 2️⃣ Setup Python
-      - uses: actions/setup-python@v5
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.11'
 
-      # 3️⃣ Install dependencies
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install pandas numpy scikit-learn mlflow dagshub tensorflow hopsworks==4.2.* hsfs==4.2.*
+
 
       # 4️⃣ Debug environment variables (optional)
       - name: Show env variables
