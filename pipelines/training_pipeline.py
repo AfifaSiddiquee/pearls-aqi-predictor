@@ -13,7 +13,9 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from mlflow.tracking import MlflowClient
 
-mlflow.set_tracking_uri("https://dagshub.com/AfifaSiddiquee/AQIPredictorProject.mlflow/")
+mlflow.set_tracking_uri(
+    "https://dagshub.com/AfifaSiddiquee/AQIPredictorProject.mlflow/"
+)
 
 def evaluate(y_true, y_pred):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
