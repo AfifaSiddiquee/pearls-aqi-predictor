@@ -26,18 +26,5 @@ jobs:
         run: |
           pip install pandas numpy scikit-learn mlflow dagshub tensorflow hopsworks==4.2.* hsfs==4.2.*
 
-
-      # 4️⃣ Debug environment variables (optional)
-      - name: Show env variables
-        run: |
-          echo "OPENWEATHER_API_KEY: $OPENWEATHER_API_KEY"
-          echo "HOPSWORKS_API_KEY: $HOPSWORKS_API_KEY"
-          echo "PYTHONPATH: $PYTHONPATH"
-
-      # 5️⃣ Run the feature pipeline with unbuffered output
-      - name: Run Feature Pipeline
-        env:
-          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
-          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
-          PYTHONPATH: ${{ github.workspace }}
+      - name: Run feature pipeline
         run: python -u pipelines/feature_pipeline.py
