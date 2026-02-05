@@ -60,9 +60,10 @@ if __name__ == "__main__":
     end_date = datetime.utcnow()
     start_date = end_date - timedelta(days=180)
 
-
     print("Fetching historical AQI data...")
     df = fetch_historical_aqi(start_date, end_date)
+
     os.makedirs("data/raw", exist_ok=True)
     df.to_csv("data/raw/historical_aqi.csv", index=False)
-    print("Raw historical AQI data saved to data/raw/historical_aqi.csv")
+
+    print(f"Saved {len(df)} records")
