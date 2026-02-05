@@ -25,7 +25,8 @@ def run_feature_pipeline():
         # Step 3: Connect to Hopsworks
         print("Connecting to Hopsworks...")
         project = hopsworks.login(api_key_value=os.getenv("HOPSWORKS_API_KEY"))
-        print("Logged in to Hopsworks:", project)
+        print("Logged in to Hopsworks project successfully")
+
 
         fs = project.get_feature_store()
 
