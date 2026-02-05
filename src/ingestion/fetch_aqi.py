@@ -12,7 +12,13 @@ def fetch_aqi():
     params = {"lat": LAT, "lon": LON, "appid": API_KEY}
     response = requests.get(BASE_URL, params=params)
     response.raise_for_status()
-    data = response.json()["list"][0]
+json_data = response.json()
+
+if "list" not in json_data or len(json_data["list"]) == 0:
+    raise ValueError("No AQI data returned from OpenWeather API")
+
+data = json_data["list"][0]
+
 
     return {
         "city": "Karachi",
