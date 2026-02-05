@@ -2,7 +2,7 @@ name: Feature Pipeline (Hourly)
 
 on:
   schedule:
-    - cron: "0 * * * *"   # every hour
+    - cron: "0 * * * *"  # every hour
   workflow_dispatch:
 
 jobs:
@@ -10,19 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout the repo
       - uses: actions/checkout@v4
 
+      # 2️⃣ Setup Python
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
+      # 4️⃣ Debug environment variables (optional)
+      - name: Show env variables
+        run: |
+          echo "OPENWEATHER_API_KEY: $OPENWEATHER_API_KEY"
+          echo "HOPSWORKS_API_KEY: $HOPSWORKS_API_KEY"
+          echo "PYTHONPATH: $PYTHONPATH"
+
+      # 5️⃣ Run the feature pipeline with unbuffered output
       - name: Run Feature Pipeline
         env:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
           PYTHONPATH: ${{ github.workspace }}
         run: python -u pipelines/feature_pipeline.py
-
