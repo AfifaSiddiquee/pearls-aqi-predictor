@@ -22,12 +22,12 @@ def run_feature_pipeline():
     fs = project.get_feature_store()
 
     fg = fs.get_or_create_feature_group(
-        name="aqi_features",
-        version=1,
-        primary_key=["city"],
-        event_time="timestamp",
-        description="AQI features from OpenWeather"
-    )
+    name="aqi_features",
+    version=1,
+    primary_key=["city", "timestamp"],
+    event_time="timestamp",
+    description="AQI features from OpenWeather"
+)
 
     fg.insert(df)
 
