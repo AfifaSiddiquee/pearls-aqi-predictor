@@ -1,7 +1,8 @@
 import os
 import pandas as pd
 import hopsworks
-from src.ingestion.fetch_aqi import fetch_aqi
+from src.ingestion.fetch_historical_aqi import fetch_historical_aqi
+from datetime import datetime, timedelta
 
 def run_feature_pipeline():
     try:
