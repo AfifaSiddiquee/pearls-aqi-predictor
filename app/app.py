@@ -1,3 +1,10 @@
+import subprocess
+import sys
+
+# Install dependencies from requirements_app.txt at startup
+subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "../requirements_app.txt"])
+
+
 import streamlit as st
 import pandas as pd
 import numpy as np
