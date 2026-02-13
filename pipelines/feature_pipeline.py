@@ -38,7 +38,7 @@ def run_feature_pipeline():
 
     if is_empty:
         end_date = datetime.utcnow()
-        start_date = end_date - timedelta(days=180)
+        start_date = end_date - timedelta(days=120)
         print("Fetching 6 months historical AQI data...")
         df_hist = fetch_historical_aqi(start_date, end_date)
         if not df_hist.empty:
