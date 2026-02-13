@@ -2,7 +2,7 @@ name: Training Pipeline (Daily)
 
 on:
   schedule:
-    - cron: "30 0 * * *"   # daily (UTC)
+    - cron: "30 0 * * *"   # daily at 00:30 UTC
   workflow_dispatch:
 
 jobs:
@@ -10,14 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: '3.11'
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install pandas numpy scikit-learn mlflow dagshub tensorflow hopsworks==4.2.*
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Train & Register Best Model
         env:
@@ -25,4 +32,4 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
           PYTHONPATH: ${{ github.workspace }}
-        run: python pipelines/training_pipeline.py
+        run: python -u pipelines/training_pipeline.py
