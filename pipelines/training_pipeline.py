@@ -31,7 +31,7 @@ def run_training_pipeline():
     project = hopsworks.login(api_key_value=os.getenv("HOPSWORKS_API_KEY"))
     fs = project.get_feature_store()
 
-    fg = fs.get_feature_group("aqi_features", version=1)
+    fg = fs.get_feature_group("karachi_aqi_features", version=1)
     df = fg.read()
 
     # 2️⃣ Split features & target
