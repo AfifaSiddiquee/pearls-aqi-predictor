@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas numpy scikit-learn mlflow dagshub tensorflow hopsworks==4.2.* "hsfs>=3.7.9,<4.0"
+          pip install pandas numpy scikit-learn mlflow dagshub tensorflow hopsworks==4.2.*
 
 
       - name: Run feature pipeline
