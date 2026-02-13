@@ -8,7 +8,9 @@ from src.ingestion.fetch_historical_aqi import fetch_historical_aqi
 
 def run_feature_pipeline():
     # Connect to Hopsworks project
-    project = hopsworks.login()
+    project = hopsworks.login(
+    api_key_value=os.getenv("HOPSWORKS_API_KEY")
+)
     fs = project.get_feature_store()  # Should now work with hopsworks==4.2.*
 
     # Define feature group
