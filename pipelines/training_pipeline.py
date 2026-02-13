@@ -35,7 +35,7 @@ def run_training_pipeline():
     df = fg.read()
 
     # 2️⃣ Split features & target
-    X = df.drop(columns=["aqi", "timestamp"])
+    X = df.drop(columns=["aqi", "timestamp", "city"])
     y = df["aqi"]
 
     split = int(len(X) * 0.8)
