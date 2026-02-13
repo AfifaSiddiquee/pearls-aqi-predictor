@@ -28,7 +28,13 @@ def run_feature_pipeline():
         print("Feature group created.")
 
     # 1️⃣ Fetch historical data (6 months) if feature group empty
-    if fg.read().empty:
+    try:
+    existing = fg.select_all().read()
+    is_empty = existing.empty
+    except:
+    is_empty = True
+
+    if is_empty:
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=180)
         print("Fetching 6 months historical AQI data...")
