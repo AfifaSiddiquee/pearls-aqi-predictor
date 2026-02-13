@@ -2,7 +2,7 @@ name: Training Pipeline (Daily)
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # daily (UTC)
+    - cron: "30 0 * * *"   # daily (UTC)
   workflow_dispatch:
 
 jobs:
