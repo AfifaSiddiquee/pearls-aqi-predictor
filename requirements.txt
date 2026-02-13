@@ -3,8 +3,8 @@ numpy
 scikit-learn
 mlflow
 dagshub
-tensorflow
-hopsworks==4.2.*
+tensorflow==2.15.1
+hopsworks==4.2.10
 confluent-kafka
 xgboost
 streamlit
