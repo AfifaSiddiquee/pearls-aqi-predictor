@@ -7,5 +7,4 @@ tensorflow
 hopsworks==4.2.*
 confluent-kafka
 xgboost
-
-
+streamlit
