@@ -22,7 +22,8 @@ def run_feature_pipeline():
             version=1,
             description="AQI and pollutant data for Karachi",
             primary_key=["city", "timestamp"],
-            event_time="timestamp"
+            event_time="timestamp",
+            online_enabled=True
         )
         print("Feature group created.")
 
