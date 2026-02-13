@@ -5,3 +5,6 @@ mlflow
 dagshub
 tensorflow
 hopsworks==4.2.*
+confluent-kafka
+
+
