@@ -5,7 +5,8 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 0 * * *"  # runs daily at midnight UTC
+    - cron: "0 * * * *"   # runs every hour
+  workflow_dispatch:
 
 jobs:
   feature-pipeline:
@@ -19,16 +20,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Upgrade pip
-        run: pip install --upgrade pip
-
       - name: Install dependencies
         run: |
+          pip install --upgrade pip
           pip install pandas numpy scikit-learn mlflow dagshub tensorflow hopsworks==4.2.*
-              pip install --upgrade pip
-              pip install -r requirements.txt
-              pip install confluent-kafka
-
+          pip install -r requirements.txt
+          pip install confluent-kafka
 
       - name: Run feature pipeline
         env:
@@ -36,4 +33,3 @@ jobs:
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
           PYTHONPATH: ${{ github.workspace }}
         run: python -u pipelines/feature_pipeline.py
-
