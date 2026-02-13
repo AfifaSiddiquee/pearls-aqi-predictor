@@ -1,0 +1,9 @@
+pandas
+numpy
+scikit-learn
+mlflow
+dagshub
+tensorflow==2.15.1
+hopsworks==4.2.10
+xgboost
+streamlit
