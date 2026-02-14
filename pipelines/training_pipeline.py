@@ -26,7 +26,6 @@ def evaluate(y_true, y_pred):
 
 
 def run_training_pipeline():
-
     # 1️⃣ Connect to Hopsworks
     project = hopsworks.login(api_key_value=os.getenv("HOPSWORKS_API_KEY"))
     fs = project.get_feature_store()
@@ -45,7 +44,7 @@ def run_training_pipeline():
     # 3️⃣ Train models
     all_metrics = {}
 
-    # Random Forest
+    # ----- Random Forest -----
     with mlflow.start_run(run_name="RandomForest"):
         rf = RandomForestRegressor(n_estimators=100, random_state=42)
         rf.fit(X_train, y_train)
@@ -55,7 +54,7 @@ def run_training_pipeline():
         mlflow.sklearn.log_model(rf, "model")
         all_metrics["RandomForest"] = (rf, metrics)
 
-    # Ridge
+    # ----- Ridge Regression -----
     with mlflow.start_run(run_name="Ridge"):
         ridge = Ridge(alpha=1.0)
         ridge.fit(X_train, y_train)
@@ -65,7 +64,7 @@ def run_training_pipeline():
         mlflow.sklearn.log_model(ridge, "model")
         all_metrics["Ridge"] = (ridge, metrics)
 
-    # Neural Net
+    # ----- Neural Net -----
     with mlflow.start_run(run_name="NeuralNet"):
         nn = Sequential([
             Dense(64, activation="relu", input_shape=(X_train.shape[1],)),
@@ -83,26 +82,26 @@ def run_training_pipeline():
     # 4️⃣ Select best model (lowest RMSE)
     best_model_name = min(all_metrics, key=lambda k: all_metrics[k][1]["rmse"])
     best_model_obj = all_metrics[best_model_name][0]
+    print(f"Best model: {best_model_name} with RMSE: {all_metrics[best_model_name][1]['rmse']}")
 
-    # 5️⃣ Save best model as pickle (only for scikit-learn)
-    os.makedirs("models", exist_ok=True)
-    if best_model_name in ["RandomForest", "Ridge"]:
-        joblib.dump(best_model_obj, "models/best_model.pkl")
-        print(f"Best model ({best_model_name}) saved as models/best_model.pkl")
+    # 5️⃣ Save best model locally for Streamlit app
+    os.makedirs("app", exist_ok=True)
+    if best_model_name in ["RandomForest", "Ridge", "XGBRegressor"]:
+        # Save scikit-learn model as .pkl
+        joblib.dump(best_model_obj, "app/best_model.pkl")
+        print(f"Saved {best_model_name} as app/best_model.pkl for Streamlit.")
     else:
-        # NeuralNet (TF) save as .h5
-        best_model_obj.save("models/best_model.h5")
-        print("Best model (NeuralNet) saved as models/best_model.h5")
+        # NeuralNet (TensorFlow) save as .h5
+        best_model_obj.save("app/best_model.h5")
+        print("Saved NeuralNet model as app/best_model.h5 for Streamlit.")
 
-    # 6️⃣ Register best model in MLflow (existing code)
+    # 6️⃣ Register best model in MLflow (optional)
     client = MlflowClient()
     MODEL_NAME = "AQI_Predictor_Best"
-    # Only needed if you want to keep MLflow registry
     try:
         client.create_registered_model(MODEL_NAME)
     except:
         pass
-
     print(f"Best model registered in MLflow: {best_model_name}")
 
 
