@@ -60,4 +60,20 @@ A real-time **Air Quality Index (AQI) forecasting system** for Karachi, Pakistan
 ---
 
 ## ⚙️ Project Structure
+pearls-aqi-predictor
+├── .github/workflows # CI/CD workflows for feature & training pipelines
+├── data
+│ ├── raw # Raw AQI & pollutant CSV files
+│ └── processed # Processed feature datasets
+├── notebooks # EDA & exploration notebooks
+├── pipelines # Feature & training pipelines
+├── src
+│ ├── config # Configuration files
+│ ├── features # Feature engineering scripts
+│ ├── ingestion # API data fetching scripts
+│ └── inference # Model prediction scripts
+├── app # Streamlit dashboard
+├── requirements.txt # Dependencies for app
+├── requirements_pipeline.txt # Dependencies for pipelines
+└── README.md
 
