@@ -25,7 +25,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.title("Karachi — Air Quality Monitoring & Forecast Dashboard")
+st.markdown(
+    "<h1 style='text-align: center;'>Karachi — Air Quality Monitoring & Forecast Dashboard</h1>",
+    unsafe_allow_html=True
+)
+st.markdown(
+    "<p style='text-align: center;'>Real-time AQI predictions with past trends and forecast visualization.</p>",
+    unsafe_allow_html=True
+)
 st.image("image.png", use_column_width=True)
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
