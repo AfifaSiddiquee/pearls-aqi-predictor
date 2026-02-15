@@ -44,13 +44,12 @@ def get_aqi_category(aqi_val):
         return "Hazardous", "purple"
 
 # --------------------------------------------------
-# 3-Day AQI Forecast with color-coded rows and no index
+# 3-Day AQI Forecast Table (no numeric index, colored rows)
 # --------------------------------------------------
 st.subheader("🌟 3-Day AQI Forecast")
 with st.spinner("Generating 3-day AQI forecast..."):
     aqi_preds = get_3day_aqi()
 
-# Round for display
 aqi_display = [int(round(val)) for val in aqi_preds]
 future_dates = [datetime.utcnow() + timedelta(days=i) for i in range(3)]
 
@@ -60,24 +59,24 @@ forecast_df = pd.DataFrame({
     "Category": [get_aqi_category(a)[0] for a in aqi_display]
 })
 
-# Define colors mapping for AQI categories
+# Color mapping
 category_colors = {
-    "Good": "background-color: #7CFC00; color: black",
-    "Fair": "background-color: #FFFF66; color: black",
-    "Moderate": "background-color: #FFA500; color: white",
-    "Poor": "background-color: #FF4500; color: white",
-    "Hazardous": "background-color: #800080; color: white"
+    "Good": "#7CFC00",
+    "Fair": "#FFFF66",
+    "Moderate": "#FFA500",
+    "Poor": "#FF4500",
+    "Hazardous": "#800080"
 }
 
-# Apply row-wise styling based on Category
-def row_style(row):
-    return [category_colors[row["Category"]]]*len(row)
+# Display table row by row with colored backgrounds
+for i, row in forecast_df.iterrows():
+    color = category_colors[row["Category"]]
+    st.markdown(
+        f"<div style='background-color:{color}; padding:10px; margin-bottom:5px; border-radius:5px;'>"
+        f"<strong>{row['Date']}</strong> — AQI: {row['Predicted AQI']} — {row['Category']}</div>",
+        unsafe_allow_html=True
+    )
 
-# Set Date as index and hide default numeric index
-st.dataframe(
-    forecast_df.set_index("Date").style.apply(row_style, axis=1).hide_index().set_properties(**{'text-align': 'center'}),
-    height=150
-)
 
 
 # --------------------------------------------------
