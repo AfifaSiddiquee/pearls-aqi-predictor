@@ -29,7 +29,7 @@ st.title("🌍 Karachi AQI Predictor")
 st.markdown("Real-time AQI predictions with past trends and forecast visualization.")
 st.image("image.png", use_column_width=True)
 img = Image.open("image1.png")
-img = img.resize((700, 200))  
+img = img.resize((700, 500))  
 st.image(img, use_column_width=True)
 
 
