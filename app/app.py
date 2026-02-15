@@ -83,7 +83,7 @@ for i, row in forecast_df.iterrows():
 # --------------------------------------------------
 import altair as alt
 
-st.subheader("📊 3-Day AQI Trend")
+st.subheader("3-Day AQI Trend")
 
 # Simulate small variations for visualization only
 display_aqi = [aqi_display[0] + i*0.2 for i in range(3)]  # e.g., 3, 3.2, 3.4
