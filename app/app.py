@@ -124,7 +124,7 @@ for i, aqi_val in enumerate(aqi_display):
 # --------------------------------------------------
 # 🧪 Live Pollutant Composition (Pie Chart)
 # --------------------------------------------------
-st.subheader("🧪 Live Pollutant Composition")
+st.subheader("🧪 Live Pollutant Composition — Last 7 Day")
 
 # Fetch last 7 days features
 last_7_days_df = fetch_last_n_days(7)
