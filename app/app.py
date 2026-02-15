@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition — Last 7 Days (Column Chart)
+# 🧪 Live Pollutant Composition — Last 7 Days (Sorted Column Chart)
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition — Last 7 Days")
 
@@ -139,14 +139,23 @@ composition_df = pd.DataFrame({
     "Percentage": percentages.values
 })
 
+# 🔥 SORT descending (highest to lowest)
+composition_df = composition_df.sort_values(
+    by="Percentage",
+    ascending=False
+)
+
 import altair as alt
 
-# Column chart
 bar_chart = (
     alt.Chart(composition_df)
     .mark_bar()
     .encode(
-        x=alt.X("Pollutant:N", title="Pollutant"),
+        x=alt.X(
+            "Pollutant:N",
+            sort="-y",   # ensures visual sorting matches percentage
+            title="Pollutant"
+        ),
         y=alt.Y("Percentage:Q", title="Contribution (%)"),
         color=alt.Color("Pollutant:N", legend=None),
         tooltip=[
@@ -157,18 +166,13 @@ bar_chart = (
     .properties(width=600, height=400)
 )
 
-# Add percentage labels on top of bars
 text = bar_chart.mark_text(
-    dy=-10,
-    color="black"
+    dy=-10
 ).encode(
     text=alt.Text("Percentage:Q", format=".2f")
 )
 
-final_chart = bar_chart + text
-
-st.altair_chart(final_chart, use_container_width=True)
-
+st.altair_chart(bar_chart + text, use_container_width=True)
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode) with day, date & month
