@@ -122,37 +122,41 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition with correct values on slices
+# 🧪 Live Pollutant Composition (name + value on slices)
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition")
 
-# Fetch last 7 days features
+# Last 7 days avg concentrations
 last_7_days_df = fetch_last_n_days(7)
-
-# Compute average concentrations over last 7 days
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
 avg_pollutants = last_7_days_df[pollutants].mean().round(3)
 
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
-    "Average Concentration": avg_pollutants.values
+    "Average": avg_pollutants.values
 })
 
-# Create a pie (donut) chart
+# Compute cumulative fractions for label positions
+composition_df["fraction"] = composition_df["Average"] / composition_df["Average"].sum()
+composition_df["angle"] = composition_df["fraction"].cumsum() - composition_df["fraction"]/2
+
+# Combine name + value
+composition_df["label"] = composition_df.apply(lambda x: f"{x['Pollutant']}\n{x['Average']}", axis=1)
+
+# Create pie (donut)
 pie = alt.Chart(composition_df).mark_arc(innerRadius=50).encode(
-    theta=alt.Theta(field="Average Concentration", type="quantitative"),
+    theta=alt.Theta(field="Average", type="quantitative"),
     color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-    tooltip=["Pollutant", "Average Concentration"]
+    tooltip=["Pollutant", "Average"]
 )
 
-# Add text labels that align with their slices
-text = alt.Chart(composition_df).mark_text(radius=80, size=14).encode(
-    theta=alt.Theta(field="Average Concentration", type="quantitative", stack=True),
-    text=alt.Text("Average Concentration:Q", format=".3f"),
-    color=alt.value("black")
+# Add labels (name + value) inside slices
+text = alt.Chart(composition_df).mark_text(radius=80, size=14, color="black", align="center").encode(
+    theta=alt.Theta(field="angle", type="quantitative"),
+    text=alt.Text("label:N")
 )
 
-# Combine pie + text
+# Combine pie + labels
 st.altair_chart(pie + text, use_container_width=True)
 
 
