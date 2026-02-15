@@ -63,9 +63,6 @@ A real-time **Air Quality Index (AQI) forecasting system** for Karachi, Pakistan
 
 ## ⚙️ Project Structure
 
-
-## ⚙️ Project Structure
-
 ```
 pearls-aqi-predictor
 ├── .github/workflows          # CI/CD workflows (feature & training pipelines)
@@ -158,5 +155,4 @@ pearls-aqi-predictor
 ⚡ AI & Data Science Intern | Pearls AQI Predictor
 ```
 
-This is the complete README with everything you provided, formatted for GitHub. You can copy this entire block and paste it directly into your repository's README.md file.
 
