@@ -14,7 +14,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from src.inference.predict_aqi import get_3day_aqi
+from src.inference.predict_aqi import get_3day_aqi, fetch_last_n_days
 
 # --------------------------------------------------
 # Streamlit page config
@@ -26,7 +26,7 @@ st.set_page_config(
 )
 
 st.title("🌍 Karachi AQI Predictor")
-st.markdown("Real-time AQI predictions with forecast visualization.")
+st.markdown("Real-time AQI predictions with past trends and forecast visualization.")
 
 # --------------------------------------------------
 # Helper: AQI category & color
@@ -47,20 +47,33 @@ def get_aqi_category(aqi_val):
 # 3-Day AQI Forecast
 # --------------------------------------------------
 st.subheader("🌟 3-Day AQI Forecast")
-aqi_preds = get_3day_aqi()
+with st.spinner("Generating 3-day AQI forecast..."):
+    aqi_preds = get_3day_aqi()
+
+# Round for display
 aqi_display = [int(round(val)) for val in aqi_preds]
 future_dates = [datetime.utcnow() + timedelta(days=i) for i in range(3)]
 
-cols = st.columns(3)
-for i, col in enumerate(cols):
-    category, color = get_aqi_category(aqi_display[i])
-    col.metric(
-        label=future_dates[i].strftime("%A"),
-        value=str(aqi_display[i]),
-        delta=category
-    )
+# Create a compact dataframe table
+forecast_df = pd.DataFrame({
+    "Date": [d.strftime("%A, %d %b %Y") for d in future_dates],
+    "Predicted AQI": aqi_display,
+    "Category": [get_aqi_category(a)[0] for a in aqi_display]
+})
 
+# Use st.dataframe with centered columns to reduce spacing
+st.dataframe(
+    forecast_df.style.set_properties(**{
+        'text-align': 'center',
+        'width': '80px'
+    }),
+    height=150
+)
+
+# --------------------------------------------------
 # 3-day line chart
+# --------------------------------------------------
+st.subheader("📊 3-Day AQI Trend")
 st.line_chart(pd.DataFrame({
     "Date": [d.strftime("%a") for d in future_dates],
     "AQI": aqi_display
@@ -71,6 +84,7 @@ st.line_chart(pd.DataFrame({
 # --------------------------------------------------
 st.subheader("📈 30-Day AQI Forecast Trend (demo-mode)")
 
+# Simple demo-mode: rolling variations around last AQI
 base_aqi = aqi_display[-1]  # last known AQI
 aqi_30 = []
 for i in range(30):
