@@ -74,13 +74,32 @@ for i, row in forecast_df.iterrows():
 
 
 # --------------------------------------------------
-# 3-day line chart
+# 3-Day AQI Trend (y-axis fixed 1–5)
 # --------------------------------------------------
+import altair as alt
+
 st.subheader("📊 3-Day AQI Trend")
-st.line_chart(pd.DataFrame({
-    "Date": [d.strftime("%a") for d in future_dates],
-    "AQI": aqi_display
-}).set_index("Date"))
+
+trend_df = pd.DataFrame({
+    "Date": [d.strftime("%a %d") for d in future_dates],
+    "AQI": aqi_display  # use actual predicted values
+})
+
+# Altair line chart with fixed y-axis
+chart = (
+    alt.Chart(trend_df)
+    .mark_line(point=True, interpolate='monotone', color='green')
+    .encode(
+        x=alt.X("Date", title="Day"),
+        y=alt.Y("AQI", title="Predicted AQI (1–5)", scale=alt.Scale(domain=[1, 5])),
+        tooltip=["Date", "AQI"]
+    )
+    .properties(width=600, height=300)
+    .interactive()
+)
+
+st.altair_chart(chart, use_container_width=True)
+
 
 
 # --------------------------------------------------
