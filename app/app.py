@@ -159,7 +159,7 @@ pie = base.mark_arc()
 
 # Text labels on slices
 text = base.mark_text(
-    radius=120,   # controls distance of label from center
+    radius=140,   # controls distance of label from center
     size=12,
     color="black"
 ).encode(
