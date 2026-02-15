@@ -1,6 +1,3 @@
-Here's your complete README in a single block you can copy and paste directly to GitHub:
-
-```markdown
 # Pearls AQI Predictor
 
 A real-time **Air Quality Index (AQI) forecasting system** for Karachi, Pakistan, predicting AQI for the next 3 days using a **100% serverless stack**. This project combines automated data collection, feature engineering, machine learning model training, and interactive visualization in a dashboard.
@@ -63,6 +60,9 @@ A real-time **Air Quality Index (AQI) forecasting system** for Karachi, Pakistan
 | Dependency Management      | requirements.txt, requirements_pipeline.txt |
 
 ---
+
+## ⚙️ Project Structure
+
 
 ## ⚙️ Project Structure
 
@@ -159,3 +159,4 @@ pearls-aqi-predictor
 ```
 
 This is the complete README with everything you provided, formatted for GitHub. You can copy this entire block and paste it directly into your repository's README.md file.
+
