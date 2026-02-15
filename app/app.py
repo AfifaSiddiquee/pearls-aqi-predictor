@@ -139,7 +139,7 @@ with st.spinner("Computing model explanations..."):
         # Plot horizontal bar chart
         import matplotlib.pyplot as plt
 
-        fig, ax = plt.subplots(figsize=(3,2))  # compact figure
+        fig, ax = plt.subplots(figsize=(10,2))  # compact figure
         mean_shap.plot(kind="barh", ax=ax, color="green")
         ax.set_xlabel("Mean |SHAP value|")
         ax.set_title("Top 5 Feature Contributions")
