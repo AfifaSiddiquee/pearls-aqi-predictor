@@ -29,32 +29,29 @@ def fetch_last_n_days(n=7):
     return df.head(n)
 
 # --------------------------------------------------
-# Forecast pollutants for next 3 days using rolling mean + trend
+# Forecast pollutants for next 3 days with demo variation
 # --------------------------------------------------
-def forecast_pollutants(last_n_days_df):
+def forecast_pollutants_demo(last_n_days_df):
     pollutants = ["pm25","pm10","co","no2","so2","o3"]
     
-    # Rolling mean over last N days
+    # Rolling mean
     mean_vals = last_n_days_df[pollutants].mean()
     
-    # Compute linear trend based on last 3 days
+    # Linear trend based on last 3 days
     if len(last_n_days_df) >= 3:
-        slopes = {}
-        for p in pollutants:
-            slopes[p] = (last_n_days_df[p].iloc[0] - last_n_days_df[p].iloc[2]) / 2
+        slopes = {p: (last_n_days_df[p].iloc[0] - last_n_days_df[p].iloc[2])/2 for p in pollutants}
     else:
         slopes = {p: 0 for p in pollutants}
-
-    # Generate 3-day forecast with day-by-day adjustment
+    
+    # Generate 3-day forecast with amplified demo variation
     future_pollutants = []
     for i in range(3):
         day_vals = {}
         for p in pollutants:
-            day_vals[p] = mean_vals[p] + slopes.get(p, 0) * i
-            # Optional: small random fluctuation to avoid exact same values
-            day_vals[p] += np.random.uniform(-0.5, 0.5)
+            # Amplify trend + small random fluctuation for demo
+            day_vals[p] = mean_vals[p] + slopes.get(p,0)*i*1.5 + np.random.uniform(-1,1)
         future_pollutants.append(day_vals)
-
+    
     return future_pollutants
 
 # --------------------------------------------------
@@ -62,7 +59,7 @@ def forecast_pollutants(last_n_days_df):
 # --------------------------------------------------
 def generate_future_features():
     last_n_days = fetch_last_n_days(7)
-    forecast_vals_list = forecast_pollutants(last_n_days)
+    forecast_vals_list = forecast_pollutants_demo(last_n_days)
     
     future_dates = [
         datetime.utcnow(),
@@ -89,5 +86,7 @@ def get_3day_aqi():
     model = load_model()
     future_df = generate_future_features()
     preds = model.predict(future_df)
-    preds = np.round(preds).astype(int)
+    
+    # Round to 1 decimal to show small changes like 3.2, 3.4, 3.9
+    preds = np.round(preds, 1)
     return preds
