@@ -135,7 +135,7 @@ with st.spinner("Computing model explanations..."):
 
         # Create small figure for SHAP
         import matplotlib.pyplot as plt
-        plt.figure(figsize=(15, 2.5))  # width x height in inches
+        plt.figure(figsize=(18, 1))  # width x height in inches
 
         # SHAP summary_plot for bar chart
         shap.summary_plot(
