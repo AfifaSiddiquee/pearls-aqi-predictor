@@ -165,13 +165,6 @@ pollutant_pie = (
     .properties(width=400, height=400)
 )
 
-# Optional: add labels inside slices
-labels = alt.Chart(composition_df).mark_text(radius=80, size=12, color="black").encode(
-    theta=alt.Theta(field="Average Concentration", type="quantitative"),
-    text=alt.Text("label:N"),
-    detail=alt.Detail("Pollutant:N")
-)
-
 st.altair_chart(pollutant_pie + labels, use_container_width=True)
 
 # --------------------------------------------------
