@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition (Last 7 Days)
+# 🧪 Live Pollutant Composition (Last 7 Days) with Percentages
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition — Last 7 Days")
 
@@ -133,13 +133,23 @@ last_7_days_df = fetch_last_n_days(7)
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
 avg_pollutants = last_7_days_df[pollutants].mean().round(3)
 
+# Calculate percentages
+total = avg_pollutants.sum()
+percentages = (avg_pollutants / total * 100).round(2)
+
 # Create dataframe for pie chart
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
-    "Average Concentration": avg_pollutants.values
+    "Average Concentration": avg_pollutants.values,
+    "Percentage": percentages.values
 })
 
-# Altair Pie Chart (regular)
+# Add combined label for display inside slice
+composition_df["label"] = composition_df.apply(
+    lambda x: f"{x['Pollutant']} ({x['Percentage']}%)", axis=1
+)
+
+# Altair Pie Chart (regular) with percentage in tooltip
 pollutant_pie = (
     alt.Chart(composition_df)
     .mark_arc()  # full pie
@@ -148,14 +158,21 @@ pollutant_pie = (
         color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
         tooltip=[
             alt.Tooltip("Pollutant:N"), 
-            alt.Tooltip("Average Concentration:Q", format=".3f")
+            alt.Tooltip("Average Concentration:Q", format=".3f"),
+            alt.Tooltip("Percentage:Q", format=".2f")  # show percentage
         ]
     )
     .properties(width=400, height=400)
 )
 
-st.altair_chart(pollutant_pie, use_container_width=True)
+# Optional: add labels inside slices
+labels = alt.Chart(composition_df).mark_text(radius=80, size=12, color="black").encode(
+    theta=alt.Theta(field="Average Concentration", type="quantitative"),
+    text=alt.Text("label:N"),
+    detail=alt.Detail("Pollutant:N")
+)
 
+st.altair_chart(pollutant_pie + labels, use_container_width=True)
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode) with day, date & month
