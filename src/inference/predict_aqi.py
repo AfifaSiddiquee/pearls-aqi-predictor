@@ -114,23 +114,22 @@ def get_3day_aqi(return_explanations=False):
     # SHAP Explanation (optional)
     # ---------------------------------------------
     if return_explanations:
-        try:
-            # Try to access underlying model safely
-            if hasattr(model, "_model_impl"):
-                inner_model = model._model_impl.python_model.model
-            elif hasattr(model, "python_model"):
-                inner_model = model.python_model.model
-            else:
-                inner_model = model
+    try:
+        # Attempt Tree SHAP
+        if hasattr(model, "_model_impl"):
+            inner_model = model._model_impl.python_model.model
+        elif hasattr(model, "python_model"):
+            inner_model = model.python_model.model
+        else:
+            inner_model = model
 
-            explainer = shap.TreeExplainer(inner_model)
-            shap_values = explainer.shap_values(future_df)
+        explainer = shap.TreeExplainer(inner_model)
+        shap_values = explainer.shap_values(future_df)
 
-        except Exception:
-            # Fallback generic explainer
-            explainer = shap.Explainer(model.predict, future_df)
-            shap_values = explainer(future_df)
+    except Exception:
+        # Fallback: permutation explainer (works on pyfunc)
+        explainer = shap.Explainer(model.predict, future_df, algorithm="permutation")
+        shap_values = explainer(future_df)
 
-        return preds, shap_values, future_df
+    return preds, shap_values, future_df
 
-    return preds
