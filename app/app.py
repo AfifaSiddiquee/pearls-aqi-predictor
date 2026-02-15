@@ -44,7 +44,7 @@ def get_aqi_category(aqi_val):
         return "Hazardous", "purple"
 
 # --------------------------------------------------
-# 3-Day AQI Forecast with color-coded rows
+# 3-Day AQI Forecast with color-coded rows and no index
 # --------------------------------------------------
 st.subheader("🌟 3-Day AQI Forecast")
 with st.spinner("Generating 3-day AQI forecast..."):
@@ -62,22 +62,22 @@ forecast_df = pd.DataFrame({
 
 # Define colors mapping for AQI categories
 category_colors = {
-    "Good": "background-color: #7CFC00; color: black",       # green
-    "Fair": "background-color: #FFFF66; color: black",       # yellow
-    "Moderate": "background-color: #FFA500; color: white",  # orange
-    "Poor": "background-color: #FF4500; color: white",      # red
-    "Hazardous": "background-color: #800080; color: white"  # purple
+    "Good": "background-color: #7CFC00; color: black",
+    "Fair": "background-color: #FFFF66; color: black",
+    "Moderate": "background-color: #FFA500; color: white",
+    "Poor": "background-color: #FF4500; color: white",
+    "Hazardous": "background-color: #800080; color: white"
 }
 
 # Apply row-wise styling based on Category
 def row_style(row):
     return [category_colors[row["Category"]]]*len(row)
 
+# Set Date as index and hide default numeric index
 st.dataframe(
-    forecast_df.style.apply(row_style, axis=1).set_properties(**{'text-align': 'center'}),
+    forecast_df.set_index("Date").style.apply(row_style, axis=1).hide_index().set_properties(**{'text-align': 'center'}),
     height=150
 )
-
 
 
 # --------------------------------------------------
