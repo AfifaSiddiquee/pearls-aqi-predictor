@@ -166,7 +166,7 @@ def aqi_to_color(aqi_val):
         return [128, 0, 128]     # purple
 
 karachi_stations["color"] = karachi_stations["AQI"].apply(aqi_to_color)
-karachi_stations["radius"] = karachi_stations["AQI"] * 200  # radius proportional to AQI
+karachi_stations["radius"] = karachi_stations["AQI"] * 150  # radius proportional to AQI
 
 # PyDeck ScatterplotLayer
 layer = pdk.Layer(
