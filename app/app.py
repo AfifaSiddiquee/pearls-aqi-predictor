@@ -76,16 +76,6 @@ for i, col in enumerate(cols):
     )
 
 # --------------------------------------------------
-# Interactive Line Chart
-# --------------------------------------------------
-st.subheader("📈 AQI Trend (3-Day Forecast)")
-trend_df = pd.DataFrame({
-    "Date": [d.strftime("%a") for d in future_dates],
-    "AQI": aqi_display
-})
-st.line_chart(trend_df.set_index("Date"))
-
-# --------------------------------------------------
 # Health Advice Section
 # --------------------------------------------------
 st.subheader("🩺 Health Recommendations")
