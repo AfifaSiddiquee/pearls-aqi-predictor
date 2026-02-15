@@ -26,7 +26,9 @@ st.set_page_config(
 
 st.title("🌍 Karachi AQI Predictor")
 st.markdown("Real-time AQI predictions with past trends and forecast visualization.")
-st.image("image.png", caption="Air Quality Overview", use_column_width=True)
+st.image("image.png", use_column_width=True)
+st.image("image1.png", use_column_width=True)
+
 
 # --------------------------------------------------
 # Helper: AQI category & color
