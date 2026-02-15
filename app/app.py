@@ -152,9 +152,9 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🔍 Compact SHAP Model Explanation — Top 5 Features
+# 🔍 Compact SHAP Analysis — Top 5 Features
 # --------------------------------------------------
-st.subheader("💡 Model Explanation — Top Feature Contributions")
+st.subheader("💡 SHAP Analysis — Top Feature Contributions")
 st.markdown(
     "<p style='font-size:15px; color:black;'>"
     "This visualization highlights the top 5 features that contributed most to the AQI predictions, "
