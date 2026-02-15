@@ -365,6 +365,37 @@ r = pdk.Deck(
 st.pydeck_chart(r)
 
 # --------------------------------------------------
+# ⚠️ Alerts for Hazardous AQI Levels
+# --------------------------------------------------
+st.subheader("⚠️ AQI Alerts")
+st.markdown(
+    "<p style='font-size:15px; color:black;'>"
+    "The dashboard automatically highlights days with poor or hazardous air quality. Follow recommended precautions for these days."
+    "</p>",
+    unsafe_allow_html=True
+)
+
+for i, aqi_val in enumerate(aqi_display):
+    category, color = get_aqi_category(aqi_val)
+    
+    # Only trigger alert for AQI 4 (Poor) or 5 (Hazardous)
+    if aqi_val >= 4:
+        alert_message = f"""
+        **{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})**
+        
+        Recommended Actions:
+        - Limit outdoor activities.
+        - Keep windows and doors closed.
+        - Wear N95 masks if going outside.
+        - Use air purifiers indoors.
+        - Stay hydrated and monitor health symptoms.
+        """
+        if aqi_val == 4:
+            st.warning(alert_message)
+        else:  # AQI 5
+            st.error(alert_message)
+
+# --------------------------------------------------
 # Footer
 # --------------------------------------------------
 st.markdown("---")
