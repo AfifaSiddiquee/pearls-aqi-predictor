@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition — Last 7 Days
+# 🧪 Live Pollutant Composition — Last 7 Days (Column Chart)
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition — Last 7 Days")
 
@@ -136,42 +136,38 @@ percentages = (avg_pollutants / total * 100).round(2)
 
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
-    "Average Concentration": avg_pollutants.values,
     "Percentage": percentages.values
 })
 
-# Create label column (Pollutant + %)
-composition_df["Label"] = (
-    composition_df["Pollutant"] + " (" +
-    composition_df["Percentage"].astype(str) + "%)"
-)
-
 import altair as alt
 
-# Base pie
-base = alt.Chart(composition_df).encode(
-    theta=alt.Theta(field="Average Concentration", type="quantitative"),
-    color=alt.Color(field="Pollutant", type="nominal",
-                    scale=alt.Scale(scheme="category10")),
+# Column chart
+bar_chart = (
+    alt.Chart(composition_df)
+    .mark_bar()
+    .encode(
+        x=alt.X("Pollutant:N", title="Pollutant"),
+        y=alt.Y("Percentage:Q", title="Contribution (%)"),
+        color=alt.Color("Pollutant:N", legend=None),
+        tooltip=[
+            alt.Tooltip("Pollutant:N"),
+            alt.Tooltip("Percentage:Q", format=".2f")
+        ]
+    )
+    .properties(width=600, height=400)
 )
 
-pie = base.mark_arc()
-
-# Text labels on slices
-text = base.mark_text(
-    radius=140,   # controls distance of label from center
-    size=10,
+# Add percentage labels on top of bars
+text = bar_chart.mark_text(
+    dy=-10,
     color="black"
 ).encode(
-    text="Label:N"
+    text=alt.Text("Percentage:Q", format=".2f")
 )
 
-pollutant_pie = (pie + text).properties(
-    width=400,
-    height=400
-)
+final_chart = bar_chart + text
 
-st.altair_chart(pollutant_pie, use_container_width=True)
+st.altair_chart(final_chart, use_container_width=True)
 
 
 # --------------------------------------------------
