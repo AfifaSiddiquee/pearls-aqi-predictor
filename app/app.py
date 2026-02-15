@@ -152,30 +152,15 @@ forecast_30_df = pd.DataFrame({
     "AQI": aqi_30
 })
 
-# Display line chart using Streamlit (simple & evaluator-friendly)
-st.line_chart(forecast_30_df.set_index("Date"))
-# --------------------------------------------------
-# 30-Day AQI Forecast (demo-mode) with day, date & month
-# --------------------------------------------------
-st.subheader("📈 30-Day AQI Forecast Trend (demo-mode)")
+# Streamlit line chart with green line using Altair for color control
+import altair as alt
+chart_30 = alt.Chart(forecast_30_df).mark_line(color="green", point=True).encode(
+    x=alt.X("Date", title="Day"),
+    y=alt.Y("AQI", title="Predicted AQI (1–5)", scale=alt.Scale(domain=[1,5])),
+    tooltip=["Date","AQI"]
+).properties(width=800, height=300).interactive()
 
-# Generate 30-day dates
-future_30_dates = [datetime.utcnow() + timedelta(days=i) for i in range(30)]
-
-# Demo-mode AQI variations around last known AQI
-aqi_30 = []
-for i in range(30):
-    val = max(1, min(5, base_aqi + np.random.choice([-1, 0, 1])))
-    aqi_30.append(val)
-
-# Build dataframe with full date string
-forecast_30_df = pd.DataFrame({
-    "Date": [d.strftime("%a %d %b") for d in future_30_dates],  # e.g., Sun 15 Feb
-    "AQI": aqi_30
-})
-
-# Display line chart using Streamlit (simple & evaluator-friendly)
-st.line_chart(forecast_30_df.set_index("Date"))
+st.altair_chart(chart_30, use_container_width=True)
 
 
 # --------------------------------------------------
