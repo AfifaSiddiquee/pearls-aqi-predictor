@@ -100,48 +100,35 @@ def generate_future_features():
 # Main function — AQI Prediction + Optional SHAP
 # --------------------------------------------------
 def get_3day_aqi(return_explanations=False):
-    """
-    Returns 3-day AQI predictions.
-    Optionally returns SHAP explanations for feature importance.
 
-    Args:
-        return_explanations (bool): If True, returns (preds, shap_values, future_df).
-
-    Returns:
-        preds (np.array): 3-day AQI predictions
-        shap_values (shap.Explanation, optional): SHAP explanations if requested
-        future_df (pd.DataFrame, optional): features used for prediction
-    """
-
-    # Load model and generate features
     model = load_model()
     future_df = generate_future_features()
 
-    # -----------------------------
+    # ---------------------------------------------
     # Predictions
-    # -----------------------------
+    # ---------------------------------------------
     preds = model.predict(future_df)
     preds = np.round(preds, 1)
 
-    # -----------------------------
+    # ---------------------------------------------
     # SHAP Explanation (optional)
-    # -----------------------------
+    # ---------------------------------------------
     if return_explanations:
         try:
-            # Attempt Tree SHAP if underlying model exists
-            if hasattr(model, "_model_impl") and hasattr(model._model_impl.python_model, "model"):
+            # Try to access underlying model safely
+            if hasattr(model, "_model_impl"):
                 inner_model = model._model_impl.python_model.model
-            elif hasattr(model, "python_model") and hasattr(model.python_model, "model"):
+            elif hasattr(model, "python_model"):
                 inner_model = model.python_model.model
             else:
-                inner_model = model  # fallback
+                inner_model = model
 
             explainer = shap.TreeExplainer(inner_model)
             shap_values = explainer.shap_values(future_df)
 
         except Exception:
-            # Fallback: permutation explainer for pyfunc models
-            explainer = shap.Explainer(model.predict, future_df, algorithm="permutation")
+            # Fallback generic explainer
+            explainer = shap.Explainer(model.predict, future_df)
             shap_values = explainer(future_df)
 
         return preds, shap_values, future_df
