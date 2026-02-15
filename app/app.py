@@ -134,29 +134,25 @@ with st.spinner("Computing model explanations..."):
     try:
         st.markdown("### 📊 Global Feature Importance")
 
-        # Create a small figure
-        fig, ax = plt.subplots(figsize=(6, 2.5))  # small width & height
+        # Create small figure for SHAP
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(6, 2.5))  # width x height in inches
 
-        # Pass the ax to SHAP
+        # SHAP summary_plot for bar chart
         shap.summary_plot(
             shap_vals,
             future_features,
             plot_type="bar",
             show=False,
             max_display=10,
-            color_bar=False,
-            plot_size=None,  # ensures matplotlib sizing is used
-            ax=ax  # <- pass the axes explicitly
         )
 
         plt.tight_layout()
-
-        # Display in Streamlit
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(plt.gcf(), use_container_width=True)
+        plt.close()
 
     except Exception as e:
         st.warning(f"SHAP explanation could not be generated: {e}")
-
 
 
 # --------------------------------------------------
