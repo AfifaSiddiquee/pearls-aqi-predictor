@@ -57,7 +57,7 @@ future_dates = [
 
 for i, date in enumerate(future_dates):
     st.subheader(date.strftime("%A, %d %b %Y"))
-    st.metric("Predicted AQI Level (1-5)", aqi_preds[i])
+    st.metric("Predicted AQI Level (1-5)", int(round(aqi_preds[i])))
 
 # Optional: color-coded categories
 def get_aqi_category(aqi_val):
