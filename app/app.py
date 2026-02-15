@@ -1,5 +1,5 @@
 import streamlit as st
-from inference.predict_aqi import get_3day_aqi
+from src.inference.predict_aqi import get_3day_aqi
 
 st.set_page_config(page_title="Karachi AQI Predictor", layout="centered")
 st.title("🌍 Karachi AQI 3-Day Forecast")
