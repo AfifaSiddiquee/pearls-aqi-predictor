@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import pydeck as pdk
 import shap
 import matplotlib.pyplot as plt
+from PIL import Image
 from src.inference.predict_aqi import get_3day_aqi, fetch_last_n_days
 aqi_preds, shap_vals, future_features = get_3day_aqi(return_explanations=True)
 
@@ -27,7 +28,10 @@ st.set_page_config(
 st.title("🌍 Karachi AQI Predictor")
 st.markdown("Real-time AQI predictions with past trends and forecast visualization.")
 st.image("image.png", use_column_width=True)
-st.image("image1.png", use_column_width=True)
+img = Image.open("image1.png")
+img = img.resize((600, 400))  # smaller dimensions
+st.image(img, caption="Air Quality Overview", use_column_width=True)
+
 
 
 # --------------------------------------------------
