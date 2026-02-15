@@ -139,27 +139,22 @@ composition_df = pd.DataFrame({
     "Average Concentration": avg_pollutants.values
 })
 
-# Add a combined label for slice
-composition_df["label"] = composition_df.apply(
-    lambda x: f"{x['Pollutant']}: {x['Average Concentration']}", axis=1
+# Altair Pie Chart (regular)
+pollutant_pie = (
+    alt.Chart(composition_df)
+    .mark_arc()  # full pie
+    .encode(
+        theta=alt.Theta(field="Average Concentration", type="quantitative"),
+        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
+        tooltip=[
+            alt.Tooltip("Pollutant:N"), 
+            alt.Tooltip("Average Concentration:Q", format=".3f")
+        ]
+    )
+    .properties(width=400, height=400)
 )
 
-# Base pie chart
-pie = alt.Chart(composition_df).mark_arc().encode(
-    theta=alt.Theta(field="Average Concentration", type="quantitative"),
-    color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-)
-
-# Labels at center of each slice
-labels = alt.Chart(composition_df).mark_text(radius=80, size=12, color="black").encode(
-    theta=alt.Theta(field="Average Concentration", type="quantitative"),
-    text=alt.Text("label:N"),
-    # stack ensures proper angle alignment
-    detail=alt.Detail("Pollutant:N")
-)
-
-# Combine pie + labels
-st.altair_chart(pie + labels, use_container_width=True)
+st.altair_chart(pollutant_pie, use_container_width=True)
 
 
 # --------------------------------------------------
