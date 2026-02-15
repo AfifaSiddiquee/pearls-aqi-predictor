@@ -131,22 +131,22 @@ st.subheader("🔍 Model Explanation — SHAP Analysis")
 
 with st.spinner("Computing model explanations..."):
     try:
-        # ---------------------------
-        # Global Feature Importance
-        # ---------------------------
         st.markdown("### 📊 Global Feature Importance")
 
-        fig1, ax1 = plt.subplots()
+        # Set figure size (width x height in inches)
+        fig1, ax1 = plt.subplots(figsize=(8, 4))  # smaller and wide
         shap.summary_plot(
-            shap_vals,  # from get_3day_aqi(return_explanations=True)
+            shap_vals,
             future_features,
             plot_type="bar",
-            show=False
+            show=False,
+            max_display=10  # show top 10 features only
         )
         st.pyplot(fig1)
 
     except Exception as e:
         st.warning(f"SHAP explanation could not be generated: {e}")
+
 
 
 # --------------------------------------------------
