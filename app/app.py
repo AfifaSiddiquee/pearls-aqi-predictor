@@ -5,6 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
+import pandas as pd
 from src.inference.predict_aqi import get_3day_aqi
 
 st.set_page_config(page_title="Karachi AQI Predictor", layout="centered")
