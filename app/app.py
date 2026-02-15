@@ -122,38 +122,37 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 📊 Past 7-Day Pollutants Trends
+# 🧪 Live Pollutant Composition
 # --------------------------------------------------
-st.subheader("📊 Past 7-Day Pollutants Trends")
+st.subheader("🧪 Live Pollutant Composition")
 
 # Fetch last 7 days features
 last_7_days_df = fetch_last_n_days(7)
 
-# List of pollutants
+# Compute average concentrations over last 7 days
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
+avg_pollutants = last_7_days_df[pollutants].mean()
 
-# Melt dataframe for Altair plotting
-pollutant_df = last_7_days_df.melt(
-    id_vars=["timestamp"], value_vars=pollutants, 
-    var_name="Pollutant", value_name="Value"
-)
-pollutant_df["Date"] = pollutant_df["timestamp"].dt.strftime("%a %d")
+# Create a dataframe suitable for pie chart
+composition_df = pd.DataFrame({
+    "Pollutant": avg_pollutants.index,
+    "Average Concentration": avg_pollutants.values
+})
 
-# Altair line chart
-pollutant_chart = (
-    alt.Chart(pollutant_df)
-    .mark_line(point=True)
+# Altair Pie Chart
+pollutant_pie = (
+    alt.Chart(composition_df)
+    .mark_arc(innerRadius=50)  # donut-style chart
     .encode(
-        x=alt.X("Date", title="Day"),
-        y=alt.Y("Value", title="Concentration"),
-        color="Pollutant",
-        tooltip=["Date", "Pollutant", "Value"]
+        theta=alt.Theta(field="Average Concentration", type="quantitative"),
+        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
+        tooltip=["Pollutant", "Average Concentration"]
     )
-    .properties(width=800, height=400)
-    .interactive()
+    .properties(width=400, height=400)
 )
 
-st.altair_chart(pollutant_chart, use_container_width=True)
+st.altair_chart(pollutant_pie, use_container_width=True)
+
 
 
 
