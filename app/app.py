@@ -139,7 +139,7 @@ with st.spinner("Computing model explanations..."):
         # Plot horizontal bar chart
         import matplotlib.pyplot as plt
 
-        fig, ax = plt.subplots(figsize=(5,2))  # compact figure
+        fig, ax = plt.subplots(figsize=(3,2))  # compact figure
         mean_shap.plot(kind="barh", ax=ax, color="green")
         ax.set_xlabel("Mean |SHAP value|")
         ax.set_title("Top 5 Feature Contributions")
@@ -150,7 +150,6 @@ with st.spinner("Computing model explanations..."):
 
     except Exception as e:
         st.warning(f"SHAP explanation could not be generated: {e}")
-
 
 
 # --------------------------------------------------
@@ -314,8 +313,6 @@ r = pdk.Deck(
 )
 
 st.pydeck_chart(r)
-
-
 
 # --------------------------------------------------
 # Footer
