@@ -73,15 +73,6 @@ st.line_chart(pd.DataFrame({
     "AQI": aqi_display
 }).set_index("Date"))
 
-# --------------------------------------------------
-# Past 7-Day AQI Trend
-# --------------------------------------------------
-st.subheader("📆 Past 7-Day AQI Trend (daily)")
-last_7_days_df = fetch_last_n_days(7)
-past_dates = last_7_days_df["timestamp"].dt.strftime("%a %d").tolist()
-past_aqi = last_7_days_df["aqi"].tolist()
-past_df = pd.DataFrame({"Date": past_dates, "AQI": past_aqi})
-st.line_chart(past_df.set_index("Date"))
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode)
