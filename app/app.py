@@ -122,9 +122,9 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition (Pie Chart)
+# 🧪 Live Pollutant Composition (Last 7 Days)
 # --------------------------------------------------
-st.subheader("🧪 Live Pollutant Composition — Last 7 Day")
+st.subheader("🧪 Live Pollutant Composition — Last 7 Days")
 
 # Fetch last 7 days features
 last_7_days_df = fetch_last_n_days(7)
@@ -139,22 +139,30 @@ composition_df = pd.DataFrame({
     "Average Concentration": avg_pollutants.values
 })
 
-# Altair Pie Chart (regular)
-pollutant_pie = (
-    alt.Chart(composition_df)
-    .mark_arc()  # <- removed innerRadius for pie
-    .encode(
-        theta=alt.Theta(field="Average Concentration", type="quantitative"),
-        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-        tooltip=[
-            alt.Tooltip("Pollutant:N"), 
-            alt.Tooltip("Average Concentration:Q", format=".3f")
-        ]
-    )
-    .properties(width=400, height=400)
+# Pie chart
+pie_chart = alt.Chart(composition_df).mark_arc().encode(
+    theta=alt.Theta(field="Average Concentration", type="quantitative"),
+    color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
 )
 
-st.altair_chart(pollutant_pie, use_container_width=True)
+# Add labels inside slices showing "Pollutant: value"
+text_chart = alt.Chart(composition_df).mark_text(radius=100, size=12, color="black").encode(
+    theta=alt.Theta(field="Average Concentration", type="quantitative"),
+    text=alt.Text('Pollutant:N')  # start with name
+)
+
+# For name + value together
+composition_df["label"] = composition_df.apply(lambda x: f"{x['Pollutant']}: {x['Average Concentration']}", axis=1)
+text_chart = alt.Chart(composition_df).mark_text(radius=100, size=12, color="black").encode(
+    theta=alt.Theta(field="Average Concentration", type="quantitative"),
+    text=alt.Text('label:N')
+)
+
+# Combine pie + text
+final_chart = pie_chart + text_chart
+final_chart = final_chart.properties(width=400, height=400)
+
+st.altair_chart(final_chart, use_container_width=True)
 
 
 # --------------------------------------------------
