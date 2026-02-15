@@ -64,6 +64,12 @@ def get_aqi_category(aqi_val):
 # 3-Day AQI Forecast Table (no numeric index, colored rows)
 # --------------------------------------------------
 st.subheader("💡 3-Day AQI Forecast")
+st.markdown(
+    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "This table shows predicted AQI values for the next 3 days along with their corresponding air quality categories."
+    "</p>",
+    unsafe_allow_html=True
+)
 with st.spinner("Generating 3-day AQI forecast..."):
     aqi_preds, shap_values, future_features = get_3day_aqi(return_explanations=True)
 
@@ -94,13 +100,17 @@ for i, row in forecast_df.iterrows():
         unsafe_allow_html=True
     )
 
-
 # --------------------------------------------------
 # 3-Day AQI Trend (y-axis fixed 1–5)
 # --------------------------------------------------
 import altair as alt
-
 st.subheader("💡 3-Day AQI Trend")
+st.markdown(
+    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "A line chart illustrating the predicted AQI trend over the next 3 days, helping visualize daily changes."
+    "</p>",
+    unsafe_allow_html=True
+)
 
 trend_df = pd.DataFrame({
     "Date": [d.strftime("%a %d") for d in future_dates],
@@ -121,7 +131,6 @@ chart = (
 )
 
 st.altair_chart(chart, use_container_width=True)
-
 
 # --------------------------------------------------
 # Health Advice (3-day)
@@ -146,6 +155,13 @@ for i, aqi_val in enumerate(aqi_display):
 # 🔍 Compact SHAP Model Explanation — Top 5 Features
 # --------------------------------------------------
 st.subheader("💡 Model Explanation — Top Feature Contributions")
+st.markdown(
+    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "This visualization highlights the top 5 features that contributed most to the AQI predictions, "
+    "helping users understand which pollutants and factors influenced the forecast."
+    "</p>",
+    unsafe_allow_html=True
+)
 
 with st.spinner("Computing model explanations..."):
     try:
@@ -173,7 +189,12 @@ with st.spinner("Computing model explanations..."):
 # 💡 Live Pollutant Composition — Last 7 Days (Sorted Column Chart)
 # --------------------------------------------------
 st.subheader("💡 Live Pollutant Composition — Last 7 Days")
-
+st.markdown(
+    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "Shows the contribution of each pollutant (PM2.5, PM10, CO, NO2, SO2, O3) over the past 7 days."
+    "</p>",
+    unsafe_allow_html=True
+)
 last_7_days_df = fetch_last_n_days(7)
 
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
@@ -226,6 +247,12 @@ st.altair_chart(bar_chart + text, use_container_width=True)
 # 30-Day AQI Forecast (demo-mode) with day, date & month
 # --------------------------------------------------
 st.subheader("💡 30-Day AQI Forecast Trend (demo-mode)")
+st.markdown(
+    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "A demo forecast for the next 30 days to show long-term trends in air quality."
+    "</p>",
+    unsafe_allow_html=True
+)
 
 # Ensure base_aqi is defined
 base_aqi = aqi_display[-1]  # last known AQI from 3-day forecast
@@ -259,6 +286,12 @@ st.altair_chart(chart_30, use_container_width=True)
 # 📍 Map — Karachi AQI (realistic & interactive)
 # --------------------------------------------------
 st.subheader("📍 Map — Karachi AQI")
+st.markdown(
+    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "Interactive map showing AQI levels across different stations in Karachi, helping identify high-pollution areas."
+    "</p>",
+    unsafe_allow_html=True
+)
 
 # More locations across Karachi
 karachi_stations = pd.DataFrame({
