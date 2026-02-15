@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add repo root to sys.path so Python can find src
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import streamlit as st
 from src.inference.predict_aqi import get_3day_aqi
 
