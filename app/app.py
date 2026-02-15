@@ -4,16 +4,11 @@ import os
 # Add repo root to sys.path so Python can find src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import sys
-import os
-
-# Add repo root to sys.path so Python can find src
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+import pydeck as pdk 
 from src.inference.predict_aqi import get_3day_aqi, fetch_last_n_days
 
 # --------------------------------------------------
