@@ -146,23 +146,6 @@ with st.spinner("Computing model explanations..."):
         )
         st.pyplot(fig1)
 
-        # ---------------------------
-        # Local Explanation (Day 1)
-        # ---------------------------
-        st.markdown("### 📌 Why Did Model Predict This AQI? (Day 1)")
-
-        fig2, ax2 = plt.subplots()
-        shap.plots._waterfall.waterfall_legacy(
-            shap_values[0],
-            feature_names=future_features.columns,
-            show=False
-        )
-        st.pyplot(fig2)
-
-    except Exception as e:
-        st.warning("SHAP explanation could not be generated.")
-        st.text(str(e))
-
 
 # --------------------------------------------------
 # 🧪 Live Pollutant Composition — Last 7 Days (Sorted Column Chart)
