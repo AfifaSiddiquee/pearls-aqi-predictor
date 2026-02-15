@@ -122,45 +122,57 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition (Last 7 Days) with Percentages in Tooltip
+# 🧪 Live Pollutant Composition — Last 7 Days
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition — Last 7 Days")
 
-# Fetch last 7 days features
 last_7_days_df = fetch_last_n_days(7)
 
-# Compute average concentrations over last 7 days
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
 avg_pollutants = last_7_days_df[pollutants].mean().round(3)
 
-# Calculate percentages
 total = avg_pollutants.sum()
 percentages = (avg_pollutants / total * 100).round(2)
 
-# Create dataframe for pie chart
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
     "Average Concentration": avg_pollutants.values,
     "Percentage": percentages.values
 })
 
-# Altair Pie Chart (regular) with percentage in tooltip only
-pollutant_pie = (
-    alt.Chart(composition_df)
-    .mark_arc()  # full pie
-    .encode(
-        theta=alt.Theta(field="Average Concentration", type="quantitative"),
-        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-        tooltip=[
-            alt.Tooltip("Pollutant:N"), 
-            alt.Tooltip("Average Concentration:Q", format=".3f"),
-            alt.Tooltip("Percentage:Q", format=".2f")  # show percentage in tooltip
-        ]
-    )
-    .properties(width=400, height=400)
+# Create label column (Pollutant + %)
+composition_df["Label"] = (
+    composition_df["Pollutant"] + " (" +
+    composition_df["Percentage"].astype(str) + "%)"
+)
+
+import altair as alt
+
+# Base pie
+base = alt.Chart(composition_df).encode(
+    theta=alt.Theta(field="Average Concentration", type="quantitative"),
+    color=alt.Color(field="Pollutant", type="nominal",
+                    scale=alt.Scale(scheme="category10")),
+)
+
+pie = base.mark_arc()
+
+# Text labels on slices
+text = base.mark_text(
+    radius=120,   # controls distance of label from center
+    size=12,
+    color="black"
+).encode(
+    text="Label:N"
+)
+
+pollutant_pie = (pie + text).properties(
+    width=400,
+    height=400
 )
 
 st.altair_chart(pollutant_pie, use_container_width=True)
+
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode) with day, date & month
