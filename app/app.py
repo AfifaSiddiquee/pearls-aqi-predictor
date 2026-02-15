@@ -30,10 +30,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown(
-    "<p style='text-align: center; font-size:16px; color:gray;'>This dashboard provides a real-time view of Karachi's air quality, combining live AQI readings with short-term forecasts.
-    It helps users track air pollution trends, understand contributing pollutants, and make informed decisions to protect their health.</p>",
+    """
+    <p style='text-align: center; font-size:16px; color:black;'>
+    This dashboard provides a real-time view of Karachi's air quality, combining live AQI readings with short-term forecasts.
+    It helps users track air pollution trends, understand contributing pollutants, and make informed decisions to protect their health.
+    </p>
+    """,
     unsafe_allow_html=True
 )
+
 st.image("image.png", use_column_width=True)
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
