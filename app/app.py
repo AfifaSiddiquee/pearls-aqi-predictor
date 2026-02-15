@@ -25,8 +25,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.title("🌍 Karachi AQI Predictor")
-st.markdown("Real-time AQI predictions with past trends and forecast visualization.")
+st.title("Karachi — Air Quality Monitoring & Forecast Dashboard")
 st.image("image.png", use_column_width=True)
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
