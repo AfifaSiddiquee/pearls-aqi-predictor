@@ -41,14 +41,20 @@ def get_aqi_category(aqi_val):
 # 3-Day AQI Forecast
 # --------------------------------------------------
 st.subheader("🌟 3-Day AQI Forecast")
-cols = st.columns(3)
-for i, col in enumerate(cols):
-    category, color = get_aqi_category(aqi_display[i])
-    col.metric(
-        label=future_dates[i].strftime("%A"),
-        value=str(aqi_display[i]),
-        delta=category
-    )
+with st.spinner("Generating 3-day AQI forecast..."):
+    aqi_preds = get_3day_aqi()
+
+# Round for display
+aqi_display = [int(round(val)) for val in aqi_preds]
+future_dates = [datetime.utcnow() + timedelta(days=i) for i in range(3)]
+
+# Table display
+forecast_df = pd.DataFrame({
+    "Date": [d.strftime("%A, %d %b %Y") for d in future_dates],
+    "Predicted AQI": aqi_display,
+    "Category": [get_aqi_category(a)[0] for a in aqi_display]
+})
+st.table(forecast_df)
 
 # Metric cards
 st.subheader("📊 Daily AQI Levels")
