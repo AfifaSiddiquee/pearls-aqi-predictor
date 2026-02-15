@@ -113,18 +113,24 @@ def get_3day_aqi(return_explanations=False):
     # ---------------------------------------------
     # SHAP Explanation (optional)
     # ---------------------------------------------
-    if return_explanations:
+if return_explanations:
 
-        try:
-            # Use TreeExplainer for tree models
-            explainer = shap.TreeExplainer(model._model_impl.python_model.model)
-            shap_values = explainer.shap_values(future_df)
+    try:
+        # Try accessing underlying sklearn model safely
+        if hasattr(model, "_model_impl"):
+            inner_model = model._model_impl.python_model.model
+        elif hasattr(model, "python_model"):
+            inner_model = model.python_model.model
+        else:
+            inner_model = model  # fallback
 
-        except:
-            # Fallback generic explainer
-            explainer = shap.Explainer(model.predict, future_df)
-            shap_values = explainer(future_df)
+        # TreeExplainer for tree-based models
+        explainer = shap.TreeExplainer(inner_model)
+        shap_values = explainer.shap_values(future_df)
 
-        return preds, shap_values, future_df
+    except Exception:
+        # Generic fallback (always works but slower)
+        explainer = shap.Explainer(model.predict, future_df)
+        shap_values = explainer(future_df)
 
-    return preds
+    return preds, shap_values, future_df
