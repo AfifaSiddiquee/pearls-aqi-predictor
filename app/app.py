@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition
+# 🧪 Live Pollutant Composition (Pie Chart)
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition")
 
@@ -131,25 +131,25 @@ last_7_days_df = fetch_last_n_days(7)
 
 # Compute average concentrations over last 7 days
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
-avg_pollutants = last_7_days_df[pollutants].mean()
+avg_pollutants = last_7_days_df[pollutants].mean().round(3)
 
-# Round to 3 decimals
-avg_pollutants = avg_pollutants.round(3)
-
-# Create a dataframe suitable for pie chart
+# Create dataframe for pie chart
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
     "Average Concentration": avg_pollutants.values
 })
 
-# Altair Pie Chart with decimals in tooltip
+# Altair Pie Chart (regular)
 pollutant_pie = (
     alt.Chart(composition_df)
-    .mark_arc(innerRadius=50)  # donut-style chart
+    .mark_arc()  # <- removed innerRadius for pie
     .encode(
         theta=alt.Theta(field="Average Concentration", type="quantitative"),
         color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-        tooltip=[alt.Tooltip("Pollutant:N"), alt.Tooltip("Average Concentration:Q", format=".3f")]
+        tooltip=[
+            alt.Tooltip("Pollutant:N"), 
+            alt.Tooltip("Average Concentration:Q", format=".3f")
+        ]
     )
     .properties(width=400, height=400)
 )
