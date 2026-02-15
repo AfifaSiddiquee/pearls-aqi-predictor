@@ -134,7 +134,7 @@ with st.spinner("Computing model explanations..."):
         st.markdown("### 📊 Global Feature Importance")
 
         # Set figure size (width x height in inches)
-        fig1, ax1 = plt.subplots(figsize=(8, 4))  # smaller and wide
+        fig1, ax1 = plt.subplots(figsize=(6, 3))  # smaller and wide
         shap.summary_plot(
             shap_vals,
             future_features,
