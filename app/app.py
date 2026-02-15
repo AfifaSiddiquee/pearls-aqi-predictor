@@ -30,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown(
-    "<p style='text-align: center;'>Real-time AQI predictions with past trends and forecast visualization.</p>",
+    "<p style='text-align: center;'>Monitoring current air quality insights for Karachi</p>",
     unsafe_allow_html=True
 )
 st.image("image.png", use_column_width=True)
