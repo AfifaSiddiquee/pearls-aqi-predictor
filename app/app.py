@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition
+# 🧪 Live Pollutant Composition with values on slices
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition")
 
@@ -142,19 +142,31 @@ composition_df = pd.DataFrame({
     "Average Concentration": avg_pollutants.values
 })
 
-# Altair Pie Chart with decimals in tooltip
-pollutant_pie = (
+# Base pie chart
+pie = (
     alt.Chart(composition_df)
     .mark_arc(innerRadius=50)  # donut-style chart
     .encode(
         theta=alt.Theta(field="Average Concentration", type="quantitative"),
-        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-        tooltip=[alt.Tooltip("Pollutant:N"), alt.Tooltip("Average Concentration:Q", format=".3f")]
+        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10"))
     )
-    .properties(width=400, height=400)
 )
 
-st.altair_chart(pollutant_pie, use_container_width=True)
+# Text labels for each slice
+text = (
+    alt.Chart(composition_df)
+    .mark_text(radius=90, size=14, color="black")  # radius from center, font size, color
+    .encode(
+        theta=alt.Theta(field="Average Concentration", type="quantitative"),
+        text=alt.Text("Average Concentration:Q", format=".3f")
+    )
+)
+
+# Combine pie + text
+pollutant_pie_chart = pie + text
+
+st.altair_chart(pollutant_pie_chart, use_container_width=True)
+
 
 
 # --------------------------------------------------
