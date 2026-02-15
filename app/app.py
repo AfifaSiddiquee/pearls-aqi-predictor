@@ -1,129 +1,125 @@
 import os
 import streamlit as st
 import pandas as pd
-from datetime import timedelta
+import numpy as np
+import mlflow
 import hopsworks
-import joblib
+from datetime import datetime, timedelta
 
-# -----------------------------
+# --------------------------------------------------
 # Page Config
-# -----------------------------
-st.set_page_config(page_title="Karachi AQI Predictor", layout="wide")
-st.title("🌫 Karachi AQI 3-Day Forecast Dashboard")
+# --------------------------------------------------
+st.set_page_config(page_title="Karachi AQI Predictor", layout="centered")
 
-# -----------------------------
-# Connect to Hopsworks Feature Store
-# -----------------------------
+st.title("🌍 Karachi AQI 3-Day Forecast")
+st.write("Real-time AQI prediction using ML model")
+
+# --------------------------------------------------
+# Load ML Model from DagsHub
+# --------------------------------------------------
 @st.cache_resource
-def connect_feature_store():
-    project = hopsworks.login(api_key_value=os.getenv("HOPSWORKS_API_KEY"))
-    return project.get_feature_store()
-
-fs = connect_feature_store()
-fg = fs.get_feature_group("karachi_aqi_features", version=1)
-df = fg.read().sort_values("timestamp")
-
-latest_row = df.iloc[-1:].copy()
-last_timestamp = pd.to_datetime(latest_row["timestamp"].values[0])
-
-# -----------------------------
-# Load Saved Model (.pkl)
-# -----------------------------
-model_path = "app/best_model.pkl"
-model = joblib.load(model_path)
-
-# -----------------------------
-# AQI Category Mapping (1–5 Scale)
-# -----------------------------
-def aqi_category(aqi_value):
-    categories = {
-        1: ("Good", "🟢",
-            "Air quality is satisfactory, and air pollution poses little or no risk."),
-        2: ("Fair", "🟡",
-            "Acceptable air quality; sensitive individuals may experience slight effects."),
-        3: ("Moderate", "🟠",
-            "Air quality is acceptable, but sensitive groups may experience mild effects."),
-        4: ("Poor", "🔴",
-            "Sensitive groups may experience health effects; general public may also be affected."),
-        5: ("Very Poor", "🟣",
-            "Health warnings of emergency conditions; everyone may experience serious effects.")
-    }
-    return categories.get(int(round(aqi_value)),
-                          ("Unknown", "⚪", "No description available."))
-
-# -----------------------------
-# Generate 3-Day Forecast
-# -----------------------------
-future_predictions = []
-
-for i in range(1, 4):
-    future_time = last_timestamp + timedelta(days=i)
-
-    new_row = latest_row.copy()
-    new_row["timestamp"] = future_time
-    new_row["hour"] = future_time.hour
-    new_row["day"] = future_time.day
-    new_row["month"] = future_time.month
-    new_row["weekday"] = future_time.weekday()
-
-    X_future = new_row.drop(columns=["aqi", "timestamp", "city"])
-    prediction = model.predict(X_future)[0]
-
-    future_predictions.append({
-        "Date": future_time.date(),
-        "Predicted AQI": round(prediction)
-    })
-
-forecast_df = pd.DataFrame(future_predictions)
-
-# -----------------------------
-# Display Forecast
-# -----------------------------
-st.subheader("📅 3-Day AQI Forecast")
-
-for _, row in forecast_df.iterrows():
-    category, color, description = aqi_category(row["Predicted AQI"])
-
-    st.metric(
-        label=str(row["Date"]),
-        value=f"{int(row['Predicted AQI'])} ({category})"
+def load_model():
+    mlflow.set_tracking_uri(
+        "https://dagshub.com/AfifaSiddiquee/AQIPredictorProject.mlflow/"
     )
 
-    st.caption(f"{color} {description}")
+    os.environ["MLFLOW_TRACKING_USERNAME"] = st.secrets["MLFLOW_TRACKING_USERNAME"]
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = st.secrets["MLFLOW_TRACKING_PASSWORD"]
 
-    # 🚨 Hazard Alert
-    if int(row["Predicted AQI"]) >= 4:
-        st.warning("⚠️ Air quality is Poor or Very Poor. Limit outdoor exposure.")
+    model = mlflow.pyfunc.load_model("models:/AQI_Predictor_Best/latest")
+    return model
 
-    st.divider()
+# --------------------------------------------------
+# Fetch Latest Features from Hopsworks
+# --------------------------------------------------
+@st.cache_resource
+def get_latest_features():
+    project = hopsworks.login(api_key_value=st.secrets["HOPSWORKS_API_KEY"])
+    fs = project.get_feature_store()
 
-# -----------------------------
-# Historical Trend (Last 7 Days)
-# -----------------------------
-st.subheader("📈 Last 7 Days AQI Trend")
-last_7 = df.tail(7)
-st.line_chart(last_7.set_index("timestamp")["aqi"])
+    fg = fs.get_feature_group("karachi_aqi_features", version=1)
+    df = fg.read()
 
-# -----------------------------
-# Feature Importance (Tree Models Only)
-# -----------------------------
-st.subheader("🔍 Feature Importance")
+    df = df.sort_values("timestamp", ascending=False)
+    latest = df.iloc[0]
+
+    return latest
+
+# --------------------------------------------------
+# AQI Category + Health Advice
+# --------------------------------------------------
+def aqi_category(aqi_value):
+    if aqi_value <= 1:
+        return "Good", "Air quality is satisfactory. Enjoy outdoor activities."
+    elif aqi_value <= 2:
+        return "Fair", "Air quality acceptable. Sensitive individuals should be cautious."
+    elif aqi_value <= 3:
+        return "Moderate", "Limit prolonged outdoor exertion."
+    elif aqi_value <= 4:
+        return "Poor", "Avoid outdoor activities if possible."
+    else:
+        return "Very Poor", "Stay indoors. Use masks if going outside."
+
+# --------------------------------------------------
+# Main Logic
+# --------------------------------------------------
 try:
-    importances = model.feature_importances_
-    feature_names = X_future.columns
+    model = load_model()
+    latest = get_latest_features()
 
-    fi_df = pd.DataFrame({
-        "Feature": feature_names,
-        "Importance": importances
-    }).sort_values("Importance", ascending=False)
+    # Create 3 future days
+    future_dates = [
+        datetime.utcnow(),
+        datetime.utcnow() + timedelta(days=1),
+        datetime.utcnow() + timedelta(days=2)
+    ]
 
-    st.bar_chart(fi_df.set_index("Feature"))
+    rows = []
 
-except AttributeError:
-    st.info("Feature importance available only for tree-based models.")
+    for date in future_dates:
+        row = {
+            "pm25": latest["pm25"],
+            "pm10": latest["pm10"],
+            "co": latest["co"],
+            "no2": latest["no2"],
+            "so2": latest["so2"],
+            "o3": latest["o3"],
+            "hour": date.hour,
+            "day": date.day,
+            "month": date.month,
+            "weekday": date.weekday()
+        }
+        rows.append(row)
 
-# -----------------------------
-# Footer
-# -----------------------------
-st.markdown("---")
-st.caption("Built with Hopsworks Feature Store + Streamlit 🚀")
+    future_df = pd.DataFrame(rows)
+
+    predictions = model.predict(future_df)
+    predictions = np.round(predictions).astype(int)
+
+    # --------------------------------------------------
+    # Display Results
+    # --------------------------------------------------
+
+    st.subheader("📅 3-Day AQI Forecast")
+
+    for i, pred in enumerate(predictions):
+        label = ["Today", "Tomorrow", "Day After Tomorrow"][i]
+        category, advice = aqi_category(pred)
+
+        st.markdown(f"### {label}")
+        st.metric("Predicted AQI Level (1-5)", pred)
+        st.write(f"**Category:** {category}")
+        st.write(f"💡 {advice}")
+        st.divider()
+
+    # Line Chart
+    chart_df = pd.DataFrame({
+        "Day": ["Today", "Tomorrow", "Day After Tomorrow"],
+        "Predicted AQI": predictions
+    })
+
+    st.subheader("📈 Forecast Trend")
+    st.line_chart(chart_df.set_index("Day"))
+
+except Exception as e:
+    st.error(f"Error loading prediction system: {e}")
