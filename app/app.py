@@ -130,7 +130,6 @@ for i, aqi_val in enumerate(aqi_display):
 st.subheader("🔍 Model Explanation — SHAP Analysis")
 
 with st.spinner("Computing model explanations..."):
-
     try:
         # ---------------------------
         # Global Feature Importance
@@ -139,12 +138,15 @@ with st.spinner("Computing model explanations..."):
 
         fig1, ax1 = plt.subplots()
         shap.summary_plot(
-            shap_values,
+            shap_vals,  # from get_3day_aqi(return_explanations=True)
             future_features,
             plot_type="bar",
             show=False
         )
         st.pyplot(fig1)
+
+    except Exception as e:
+        st.warning(f"SHAP explanation could not be generated: {e}")
 
 
 # --------------------------------------------------
