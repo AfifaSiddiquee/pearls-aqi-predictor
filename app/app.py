@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition
+# 🧪 Live Pollutant Composition (with percentages)
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition")
 
@@ -131,32 +131,41 @@ last_7_days_df = fetch_last_n_days(7)
 
 # Compute average concentrations over last 7 days
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
-avg_pollutants = last_7_days_df[pollutants].mean()
+avg_pollutants = last_7_days_df[pollutants].mean().round(3)
 
-# Round to 3 decimals
-avg_pollutants = avg_pollutants.round(3)
+# Calculate percentage share
+total = avg_pollutants.sum()
+percentages = (avg_pollutants / total * 100).round(1)  # 1 decimal for percentage
 
-# Create a dataframe suitable for pie chart
+# Create dataframe for chart
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
-    "Average Concentration": avg_pollutants.values
+    "Average": avg_pollutants.values,
+    "Percentage": percentages
 })
 
-# Altair Pie Chart with decimals in tooltip
-pollutant_pie = (
-    alt.Chart(composition_df)
-    .mark_arc(innerRadius=50)  # donut-style chart
-    .encode(
-        theta=alt.Theta(field="Average Concentration", type="quantitative"),
-        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-        tooltip=[alt.Tooltip("Pollutant:N"), alt.Tooltip("Average Concentration:Q", format=".3f")]
-    )
-    .properties(width=400, height=400)
+# Combine name + percentage for labels
+composition_df["label"] = composition_df.apply(lambda x: f"{x['Pollutant']}\n{x['Percentage']}%", axis=1)
+
+# Compute cumulative fraction for label positions
+composition_df["fraction"] = composition_df["Average"] / composition_df["Average"].sum()
+composition_df["angle"] = composition_df["fraction"].cumsum() - composition_df["fraction"]/2
+
+# Altair donut chart with labels inside
+pie = alt.Chart(composition_df).mark_arc(innerRadius=50).encode(
+    theta=alt.Theta(field="Average", type="quantitative"),
+    color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
+    tooltip=[alt.Tooltip("Pollutant:N"), alt.Tooltip("Average:Q", format=".3f"), alt.Tooltip("Percentage:Q", format=".1f")]
 )
 
-st.altair_chart(pollutant_pie, use_container_width=True)
+# Add text labels (pollutant + percentage)
+text = alt.Chart(composition_df).mark_text(radius=80, size=14, color="black", align="center").encode(
+    theta=alt.Theta(field="angle", type="quantitative"),
+    text=alt.Text("label:N")
+)
 
-
+# Combine chart + labels
+st.altair_chart(pie + text, use_container_width=True)
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode) with day, date & month
