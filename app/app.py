@@ -30,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown(
-    "<p style='text-align: center;'>This dashboard provides a real-time view of Karachi's air quality, combining live AQI readings with short-term forecasts.
+    "<p style='text-align: center; font-size:16px; color:gray;'>This dashboard provides a real-time view of Karachi's air quality, combining live AQI readings with short-term forecasts.
     It helps users track air pollution trends, understand contributing pollutants, and make informed decisions to protect their health.</p>",
     unsafe_allow_html=True
 )
