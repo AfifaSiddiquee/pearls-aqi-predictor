@@ -121,6 +121,41 @@ for i, aqi_val in enumerate(aqi_display):
         unsafe_allow_html=True
     )
 
+# --------------------------------------------------
+# 📊 Past 7-Day Pollutants Trends
+# --------------------------------------------------
+st.subheader("📊 Past 7-Day Pollutants Trends")
+
+# Fetch last 7 days features
+last_7_days_df = fetch_last_n_days(7)
+
+# List of pollutants
+pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
+
+# Melt dataframe for Altair plotting
+pollutant_df = last_7_days_df.melt(
+    id_vars=["timestamp"], value_vars=pollutants, 
+    var_name="Pollutant", value_name="Value"
+)
+pollutant_df["Date"] = pollutant_df["timestamp"].dt.strftime("%a %d")
+
+# Altair line chart
+pollutant_chart = (
+    alt.Chart(pollutant_df)
+    .mark_line(point=True)
+    .encode(
+        x=alt.X("Date", title="Day"),
+        y=alt.Y("Value", title="Concentration"),
+        color="Pollutant",
+        tooltip=["Date", "Pollutant", "Value"]
+    )
+    .properties(width=800, height=400)
+    .interactive()
+)
+
+st.altair_chart(pollutant_chart, use_container_width=True)
+
+
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode) with day, date & month
