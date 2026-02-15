@@ -141,18 +141,31 @@ st.altair_chart(chart_30, use_container_width=True)
 # --------------------------------------------------
 st.subheader("📍 Map — Karachi AQI")
 
-# Demo locations across Karachi with neighborhood names
+# More locations across Karachi
 karachi_stations = pd.DataFrame({
-    "lat": [24.8607, 24.9056, 24.9575, 24.8820, 24.9260, 24.8350, 24.9210, 24.9450],
-    "lon": [67.0011, 67.0810, 67.0320, 67.0500, 67.0900, 67.0200, 67.0600, 67.1000],
-    "location": [
-        "Clifton", "PECHS", "Korangi", "North Nazimabad", 
-        "Gulshan-e-Iqbal", "Saddar", "Lyari", "Malir"
+    "lat": [
+        24.8607, 24.9056, 24.9575, 24.8820, 24.9260, 24.8350, 24.9210, 24.9450,
+        24.8500, 24.8700, 24.8900, 24.9100, 24.9300, 24.9500, 24.9700, 24.8800,
+        24.8400, 24.8950, 24.9150, 24.9350
     ],
-    "AQI": [3, 4, 2, 3, 5, 1, 2, 4]  # demo AQI levels
+    "lon": [
+        67.0011, 67.0810, 67.0320, 67.0500, 67.0900, 67.0200, 67.0600, 67.1000,
+        67.0100, 67.0200, 67.0300, 67.0400, 67.0500, 67.0600, 67.0700, 67.0800,
+        67.0900, 67.1000, 67.1100, 67.1200
+    ],
+    "location": [
+        "Clifton", "PECHS", "Korangi", "North Nazimabad", "Gulshan-e-Iqbal", "Saddar", "Lyari", "Malir",
+        "Shah Faisal", "Defence", "Gulistan-e-Jauhar", "Nazimabad", "SITE", "Korangi Creek", "Landhi", "Airport",
+        "Baldia", "Orangi Town", "Hyderi", "Bahadurabad"
+    ],
+    "AQI": [
+        3, 4, 2, 3, 5, 1, 2, 4,
+        3, 2, 3, 4, 1, 2, 3, 4,
+        2, 3, 4, 3
+    ]  # demo AQI levels
 })
 
-# Function to convert AQI to RGB color
+# Convert AQI to RGB color
 def aqi_to_color(aqi_val):
     if aqi_val <= 1:
         return [0, 255, 0]       # green
@@ -166,7 +179,7 @@ def aqi_to_color(aqi_val):
         return [128, 0, 128]     # purple
 
 karachi_stations["color"] = karachi_stations["AQI"].apply(aqi_to_color)
-karachi_stations["radius"] = karachi_stations["AQI"] * 100  # radius proportional to AQI
+karachi_stations["radius"] = karachi_stations["AQI"] * 100  # smaller radius for many points
 
 # PyDeck ScatterplotLayer
 layer = pdk.Layer(
@@ -187,7 +200,7 @@ view_state = pdk.ViewState(
     pitch=0
 )
 
-# Deck object with interactive tooltip
+# Deck object with interactive tooltip (only AQI number)
 r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
@@ -198,6 +211,7 @@ r = pdk.Deck(
 )
 
 st.pydeck_chart(r)
+
 
 
 # --------------------------------------------------
