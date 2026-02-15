@@ -105,7 +105,6 @@ chart = (
 st.altair_chart(chart, use_container_width=True)
 
 
-
 # --------------------------------------------------
 # Health Advice (3-day)
 # --------------------------------------------------
@@ -136,7 +135,7 @@ with st.spinner("Computing model explanations..."):
 
         # Create small figure for SHAP
         import matplotlib.pyplot as plt
-        plt.figure(figsize=(6, 2.5))  # width x height in inches
+        plt.figure(figsize=(10, 2.5))  # width x height in inches
 
         # SHAP summary_plot for bar chart
         shap.summary_plot(
