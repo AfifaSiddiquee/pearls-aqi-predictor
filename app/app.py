@@ -45,7 +45,6 @@ with col2:
     st.image("image1.png", use_column_width=True)
 
 
-
 # --------------------------------------------------
 # Helper: AQI category & color
 # --------------------------------------------------
@@ -64,7 +63,7 @@ def get_aqi_category(aqi_val):
 # --------------------------------------------------
 # 3-Day AQI Forecast Table (no numeric index, colored rows)
 # --------------------------------------------------
-st.subheader("🌟 3-Day AQI Forecast")
+st.subheader("💡 3-Day AQI Forecast")
 with st.spinner("Generating 3-day AQI forecast..."):
     aqi_preds, shap_values, future_features = get_3day_aqi(return_explanations=True)
 
@@ -101,7 +100,7 @@ for i, row in forecast_df.iterrows():
 # --------------------------------------------------
 import altair as alt
 
-st.subheader("📊 3-Day AQI Trend")
+st.subheader("💡 3-Day AQI Trend")
 
 trend_df = pd.DataFrame({
     "Date": [d.strftime("%a %d") for d in future_dates],
@@ -146,7 +145,7 @@ for i, aqi_val in enumerate(aqi_display):
 # --------------------------------------------------
 # 🔍 Compact SHAP Model Explanation — Top 5 Features
 # --------------------------------------------------
-st.subheader("🔍 Model Explanation — Top Feature Contributions")
+st.subheader("💡 Model Explanation — Top Feature Contributions")
 
 with st.spinner("Computing model explanations..."):
     try:
@@ -171,9 +170,9 @@ with st.spinner("Computing model explanations..."):
 
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition — Last 7 Days (Sorted Column Chart)
+# 💡 Live Pollutant Composition — Last 7 Days (Sorted Column Chart)
 # --------------------------------------------------
-st.subheader("🧪 Live Pollutant Composition — Last 7 Days")
+st.subheader("💡 Live Pollutant Composition — Last 7 Days")
 
 last_7_days_df = fetch_last_n_days(7)
 
@@ -188,7 +187,7 @@ composition_df = pd.DataFrame({
     "Percentage": percentages.values
 })
 
-# 🔥 SORT descending (highest to lowest)
+# SORT descending (highest to lowest)
 composition_df = composition_df.sort_values(
     by="Percentage",
     ascending=False
@@ -226,7 +225,7 @@ st.altair_chart(bar_chart + text, use_container_width=True)
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode) with day, date & month
 # --------------------------------------------------
-st.subheader("📈 30-Day AQI Forecast Trend (demo-mode)")
+st.subheader("💡 30-Day AQI Forecast Trend (demo-mode)")
 
 # Ensure base_aqi is defined
 base_aqi = aqi_display[-1]  # last known AQI from 3-day forecast
@@ -336,4 +335,4 @@ st.pydeck_chart(r)
 # Footer
 # --------------------------------------------------
 st.markdown("---")
-st.caption("⚡ Powered by Pearls AQI Predictor | Demo-mode 30-day forecast & trends")
+st.caption("⚡ Made by Afifa Siddiqui")
