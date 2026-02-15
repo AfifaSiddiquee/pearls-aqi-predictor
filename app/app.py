@@ -8,7 +8,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import pydeck as pdk 
+import pydeck as pdk
+import shap
+import matplotlib.pyplot as plt
 from src.inference.predict_aqi import get_3day_aqi, fetch_last_n_days
 
 # --------------------------------------------------
@@ -43,7 +45,7 @@ def get_aqi_category(aqi_val):
 # --------------------------------------------------
 st.subheader("🌟 3-Day AQI Forecast")
 with st.spinner("Generating 3-day AQI forecast..."):
-    aqi_preds = get_3day_aqi()
+    aqi_preds, shap_values, future_features = get_3day_aqi(return_explanations=True)
 
 aqi_display = [int(round(val)) for val in aqi_preds]
 future_dates = [datetime.utcnow() + timedelta(days=i) for i in range(3)]
@@ -120,6 +122,46 @@ for i, aqi_val in enumerate(aqi_display):
         f"<span style='color:{color}'>{category}</span> – {advice}",
         unsafe_allow_html=True
     )
+
+# --------------------------------------------------
+# 🔍 SHAP Model Explanation
+# --------------------------------------------------
+st.subheader("🔍 Model Explanation — SHAP Analysis")
+
+with st.spinner("Computing model explanations..."):
+
+    try:
+        # ---------------------------
+        # Global Feature Importance
+        # ---------------------------
+        st.markdown("### 📊 Global Feature Importance")
+
+        fig1, ax1 = plt.subplots()
+        shap.summary_plot(
+            shap_values,
+            future_features,
+            plot_type="bar",
+            show=False
+        )
+        st.pyplot(fig1)
+
+        # ---------------------------
+        # Local Explanation (Day 1)
+        # ---------------------------
+        st.markdown("### 📌 Why Did Model Predict This AQI? (Day 1)")
+
+        fig2, ax2 = plt.subplots()
+        shap.plots._waterfall.waterfall_legacy(
+            shap_values[0],
+            feature_names=future_features.columns,
+            show=False
+        )
+        st.pyplot(fig2)
+
+    except Exception as e:
+        st.warning("SHAP explanation could not be generated.")
+        st.text(str(e))
+
 
 # --------------------------------------------------
 # 🧪 Live Pollutant Composition — Last 7 Days (Sorted Column Chart)
