@@ -29,27 +29,40 @@ def fetch_last_n_days(n=7):
     return df.head(n)
 
 # --------------------------------------------------
-# Forecast pollutants for next 3 days
+# Forecast pollutants for next 3 days using rolling mean + trend
 # --------------------------------------------------
 def forecast_pollutants(last_n_days_df):
-    # Rolling mean over last N days
     pollutants = ["pm25","pm10","co","no2","so2","o3"]
-    forecast_values = last_n_days_df[pollutants].mean().to_dict()
     
-    # Optional: simple linear trend based on last 3 days
+    # Rolling mean over last N days
+    mean_vals = last_n_days_df[pollutants].mean()
+    
+    # Compute linear trend based on last 3 days
     if len(last_n_days_df) >= 3:
+        slopes = {}
         for p in pollutants:
-            trend = (last_n_days_df[p].iloc[0] - last_n_days_df[p].iloc[2]) / 2
-            forecast_values[p] += trend  # simple linear trend
-    
-    return forecast_values
+            slopes[p] = (last_n_days_df[p].iloc[0] - last_n_days_df[p].iloc[2]) / 2
+    else:
+        slopes = {p: 0 for p in pollutants}
+
+    # Generate 3-day forecast with day-by-day adjustment
+    future_pollutants = []
+    for i in range(3):
+        day_vals = {}
+        for p in pollutants:
+            day_vals[p] = mean_vals[p] + slopes.get(p, 0) * i
+            # Optional: small random fluctuation to avoid exact same values
+            day_vals[p] += np.random.uniform(-0.5, 0.5)
+        future_pollutants.append(day_vals)
+
+    return future_pollutants
 
 # --------------------------------------------------
-# Generate 3-day features
+# Generate future features including time features
 # --------------------------------------------------
 def generate_future_features():
     last_n_days = fetch_last_n_days(7)
-    forecast_vals = forecast_pollutants(last_n_days)
+    forecast_vals_list = forecast_pollutants(last_n_days)
     
     future_dates = [
         datetime.utcnow(),
@@ -58,14 +71,12 @@ def generate_future_features():
     ]
     
     rows = []
-    for date in future_dates:
-        row = {
-            **forecast_vals,
-            "hour": date.hour,
-            "day": date.day,
-            "month": date.month,
-            "weekday": date.weekday()
-        }
+    for i, date in enumerate(future_dates):
+        row = forecast_vals_list[i].copy()
+        row["hour"] = date.hour
+        row["day"] = date.day
+        row["month"] = date.month
+        row["weekday"] = date.weekday()
         rows.append(row)
     
     future_df = pd.DataFrame(rows)
