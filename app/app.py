@@ -44,7 +44,7 @@ def get_aqi_category(aqi_val):
         return "Hazardous", "purple"
 
 # --------------------------------------------------
-# 3-Day AQI Forecast
+# 3-Day AQI Forecast with color-coded rows
 # --------------------------------------------------
 st.subheader("🌟 3-Day AQI Forecast")
 with st.spinner("Generating 3-day AQI forecast..."):
@@ -54,21 +54,30 @@ with st.spinner("Generating 3-day AQI forecast..."):
 aqi_display = [int(round(val)) for val in aqi_preds]
 future_dates = [datetime.utcnow() + timedelta(days=i) for i in range(3)]
 
-# Create a compact dataframe table
 forecast_df = pd.DataFrame({
     "Date": [d.strftime("%A, %d %b %Y") for d in future_dates],
     "Predicted AQI": aqi_display,
     "Category": [get_aqi_category(a)[0] for a in aqi_display]
 })
 
-# Use st.dataframe with centered columns to reduce spacing
+# Define colors mapping for AQI categories
+category_colors = {
+    "Good": "background-color: #7CFC00; color: black",       # green
+    "Fair": "background-color: #FFFF66; color: black",       # yellow
+    "Moderate": "background-color: #FFA500; color: white",  # orange
+    "Poor": "background-color: #FF4500; color: white",      # red
+    "Hazardous": "background-color: #800080; color: white"  # purple
+}
+
+# Apply row-wise styling based on Category
+def row_style(row):
+    return [category_colors[row["Category"]]]*len(row)
+
 st.dataframe(
-    forecast_df.style.set_properties(**{
-        'text-align': 'center',
-        'width': '80px'
-    }),
+    forecast_df.style.apply(row_style, axis=1).set_properties(**{'text-align': 'center'}),
     height=150
 )
+
 
 
 # --------------------------------------------------
