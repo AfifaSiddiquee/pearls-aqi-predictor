@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition with values on slices
+# 🧪 Live Pollutant Composition with correct values on slices
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition")
 
@@ -131,42 +131,29 @@ last_7_days_df = fetch_last_n_days(7)
 
 # Compute average concentrations over last 7 days
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
-avg_pollutants = last_7_days_df[pollutants].mean()
+avg_pollutants = last_7_days_df[pollutants].mean().round(3)
 
-# Round to 3 decimals
-avg_pollutants = avg_pollutants.round(3)
-
-# Create a dataframe suitable for pie chart
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
     "Average Concentration": avg_pollutants.values
 })
 
-# Base pie chart
-pie = (
-    alt.Chart(composition_df)
-    .mark_arc(innerRadius=50)  # donut-style chart
-    .encode(
-        theta=alt.Theta(field="Average Concentration", type="quantitative"),
-        color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10"))
-    )
+# Create a pie (donut) chart
+pie = alt.Chart(composition_df).mark_arc(innerRadius=50).encode(
+    theta=alt.Theta(field="Average Concentration", type="quantitative"),
+    color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
+    tooltip=["Pollutant", "Average Concentration"]
 )
 
-# Text labels for each slice
-text = (
-    alt.Chart(composition_df)
-    .mark_text(radius=90, size=14, color="black")  # radius from center, font size, color
-    .encode(
-        theta=alt.Theta(field="Average Concentration", type="quantitative"),
-        text=alt.Text("Average Concentration:Q", format=".3f")
-    )
+# Add text labels that align with their slices
+text = alt.Chart(composition_df).mark_text(radius=80, size=14).encode(
+    theta=alt.Theta(field="Average Concentration", type="quantitative", stack=True),
+    text=alt.Text("Average Concentration:Q", format=".3f"),
+    color=alt.value("black")
 )
 
 # Combine pie + text
-pollutant_pie_chart = pie + text
-
-st.altair_chart(pollutant_pie_chart, use_container_width=True)
-
+st.altair_chart(pie + text, use_container_width=True)
 
 
 # --------------------------------------------------
