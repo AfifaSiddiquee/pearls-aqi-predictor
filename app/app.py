@@ -31,7 +31,7 @@ st.markdown(
 )
 st.markdown(
     """
-    "<p style='font-size:15px; color:black;'>"
+    <p style='text-align: center; font-size:16px; color:black;'>
     This dashboard provides a real-time view of Karachi's air quality, combining live AQI readings with short-term forecasts.
     It helps users track air pollution trends, understand contributing pollutants, and make informed decisions to protect their health.
     </p>
@@ -65,7 +65,7 @@ def get_aqi_category(aqi_val):
 # --------------------------------------------------
 st.subheader("💡 3-Day AQI Forecast")
 st.markdown(
-    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "<p style='font-size:15px; color:black;'>"
     "This table shows predicted AQI values for the next 3 days along with their corresponding air quality categories."
     "</p>",
     unsafe_allow_html=True
@@ -106,7 +106,7 @@ for i, row in forecast_df.iterrows():
 import altair as alt
 st.subheader("💡 3-Day AQI Trend")
 st.markdown(
-    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "<p style='font-size:15px; color:black;'>"
     "A line chart illustrating the predicted AQI trend over the next 3 days, helping visualize daily changes."
     "</p>",
     unsafe_allow_html=True
@@ -156,7 +156,7 @@ for i, aqi_val in enumerate(aqi_display):
 # --------------------------------------------------
 st.subheader("💡 Model Explanation — Top Feature Contributions")
 st.markdown(
-    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "<p style='font-size:15px; color:black;'>"
     "This visualization highlights the top 5 features that contributed most to the AQI predictions, "
     "helping users understand which pollutants and factors influenced the forecast."
     "</p>",
@@ -190,7 +190,7 @@ with st.spinner("Computing model explanations..."):
 # --------------------------------------------------
 st.subheader("💡 Live Pollutant Composition — Last 7 Days")
 st.markdown(
-    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "<p style='font-size:15px; color:black;'>"
     "Shows the contribution of each pollutant (PM2.5, PM10, CO, NO2, SO2, O3) over the past 7 days."
     "</p>",
     unsafe_allow_html=True
@@ -248,7 +248,7 @@ st.altair_chart(bar_chart + text, use_container_width=True)
 # --------------------------------------------------
 st.subheader("💡 30-Day AQI Forecast Trend (demo-mode)")
 st.markdown(
-    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "<p style='font-size:15px; color:black;'>"
     "A demo forecast for the next 30 days to show long-term trends in air quality."
     "</p>",
     unsafe_allow_html=True
@@ -287,7 +287,7 @@ st.altair_chart(chart_30, use_container_width=True)
 # --------------------------------------------------
 st.subheader("📍 Map — Karachi AQI")
 st.markdown(
-    "<p style='text-align: center; font-size:14px; color:gray;'>"
+    "<p style='font-size:15px; color:black;'>"
     "Interactive map showing AQI levels across different stations in Karachi, helping identify high-pollution areas."
     "</p>",
     unsafe_allow_html=True
