@@ -139,30 +139,27 @@ composition_df = pd.DataFrame({
     "Average Concentration": avg_pollutants.values
 })
 
-# Pie chart
-pie_chart = alt.Chart(composition_df).mark_arc().encode(
+# Add a combined label for slice
+composition_df["label"] = composition_df.apply(
+    lambda x: f"{x['Pollutant']}: {x['Average Concentration']}", axis=1
+)
+
+# Base pie chart
+pie = alt.Chart(composition_df).mark_arc().encode(
     theta=alt.Theta(field="Average Concentration", type="quantitative"),
     color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
 )
 
-# Add labels inside slices showing "Pollutant: value"
-text_chart = alt.Chart(composition_df).mark_text(radius=100, size=12, color="black").encode(
+# Labels at center of each slice
+labels = alt.Chart(composition_df).mark_text(radius=80, size=12, color="black").encode(
     theta=alt.Theta(field="Average Concentration", type="quantitative"),
-    text=alt.Text('Pollutant:N')  # start with name
+    text=alt.Text("label:N"),
+    # stack ensures proper angle alignment
+    detail=alt.Detail("Pollutant:N")
 )
 
-# For name + value together
-composition_df["label"] = composition_df.apply(lambda x: f"{x['Pollutant']}: {x['Average Concentration']}", axis=1)
-text_chart = alt.Chart(composition_df).mark_text(radius=100, size=12, color="black").encode(
-    theta=alt.Theta(field="Average Concentration", type="quantitative"),
-    text=alt.Text('label:N')
-)
-
-# Combine pie + text
-final_chart = pie_chart + text_chart
-final_chart = final_chart.properties(width=400, height=400)
-
-st.altair_chart(final_chart, use_container_width=True)
+# Combine pie + labels
+st.altair_chart(pie + labels, use_container_width=True)
 
 
 # --------------------------------------------------
