@@ -2,6 +2,7 @@
 
 A real-time **Air Quality Index (AQI) forecasting system** for Karachi, Pakistan, predicting AQI for the next 3 days using a **100% serverless stack**. This project combines automated data collection, feature engineering, machine learning model training, and interactive visualization in a dashboard.
 
+ **Interactive App**: [ ]
 ---
 
 ## 🌟 Key Features
@@ -153,6 +154,7 @@ pearls-aqi-predictor
 
 **Afifa Siddiquee**  
 ⚡ AI & Data Science Intern | Pearls AQI Predictor
+
 
 
 
