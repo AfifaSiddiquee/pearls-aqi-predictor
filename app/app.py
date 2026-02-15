@@ -12,6 +12,7 @@ import pydeck as pdk
 import shap
 import matplotlib.pyplot as plt
 from src.inference.predict_aqi import get_3day_aqi, fetch_last_n_days
+aqi_preds, shap_vals, future_features = get_3day_aqi(return_explanations=True)
 
 # --------------------------------------------------
 # Streamlit page config
