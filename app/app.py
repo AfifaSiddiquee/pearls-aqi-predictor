@@ -163,19 +163,23 @@ chart_30 = alt.Chart(forecast_30_df).mark_line(color="green", point=True).encode
 st.altair_chart(chart_30, use_container_width=True)
 
 # --------------------------------------------------
-# 📍 Map — Karachi AQI
+# 📍 Map — Karachi AQI (realistic & interactive)
 # --------------------------------------------------
 st.subheader("📍 Map — Karachi AQI")
 
-# Demo AQI locations across Karachi
-map_data = pd.DataFrame({
-    "lat": [24.8607, 24.9056, 24.9575, 24.8820, 24.9260],  # sample latitudes
-    "lon": [67.0011, 67.0810, 67.0320, 67.0500, 67.0900],  # sample longitudes
-    "AQI": [3, 4, 2, 3, 5]  # sample AQI levels
+# Demo locations across Karachi with neighborhood names
+karachi_stations = pd.DataFrame({
+    "lat": [24.8607, 24.9056, 24.9575, 24.8820, 24.9260, 24.8350, 24.9210, 24.9450],
+    "lon": [67.0011, 67.0810, 67.0320, 67.0500, 67.0900, 67.0200, 67.0600, 67.1000],
+    "location": [
+        "Clifton", "PECHS", "Korangi", "North Nazimabad", 
+        "Gulshan-e-Iqbal", "Saddar", "Lyari", "Malir"
+    ],
+    "AQI": [3, 4, 2, 3, 5, 1, 2, 4]  # demo AQI levels
 })
 
-# Assign colors based on AQI
-def get_color(aqi_val):
+# Function to convert AQI to RGB color
+def aqi_to_color(aqi_val):
     if aqi_val <= 1:
         return [0, 255, 0]       # green
     elif aqi_val == 2:
@@ -187,32 +191,39 @@ def get_color(aqi_val):
     else:
         return [128, 0, 128]     # purple
 
-map_data["color"] = map_data["AQI"].apply(get_color)
+karachi_stations["color"] = karachi_stations["AQI"].apply(aqi_to_color)
+karachi_stations["radius"] = karachi_stations["AQI"] * 400  # radius proportional to AQI
 
-import pydeck as pdk
-
-# Create PyDeck map layer
+# PyDeck ScatterplotLayer
 layer = pdk.Layer(
     "ScatterplotLayer",
-    data=map_data,
+    data=karachi_stations,
     get_position='[lon, lat]',
     get_color='color',
-    get_radius=500,  # radius in meters
-    pickable=True
+    get_radius='radius',
+    pickable=True,
+    auto_highlight=True
 )
 
-# Deck object
+# Set view over Karachi
 view_state = pdk.ViewState(
     latitude=24.8607,
     longitude=67.0011,
-    zoom=10,
+    zoom=11,
     pitch=0
 )
 
-r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "AQI: {AQI}"})
+# Deck object with interactive tooltip
+r = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip={
+        "html": "<b>{location}</b><br>AQI: {AQI}<br>Category: {AQI}",
+        "style": {"backgroundColor": "steelblue", "color": "white"}
+    }
+)
 
 st.pydeck_chart(r)
-
 
 
 # --------------------------------------------------
