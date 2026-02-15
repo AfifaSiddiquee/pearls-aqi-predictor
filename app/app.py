@@ -139,6 +139,8 @@ st.altair_chart(chart_30, use_container_width=True)
 # --------------------------------------------------
 # 📍 Map — Karachi AQI (realistic & interactive)
 # --------------------------------------------------
+import pydeck as pdk  # Ensure this is imported at the top
+
 st.subheader("📍 Map — Karachi AQI")
 
 # Demo locations across Karachi with neighborhood names
@@ -152,7 +154,7 @@ karachi_stations = pd.DataFrame({
     "AQI": [3, 4, 2, 3, 5, 1, 2, 4]  # demo AQI levels
 })
 
-# Function to convert AQI to RGB color
+# Convert AQI to RGB color
 def aqi_to_color(aqi_val):
     if aqi_val <= 1:
         return [0, 255, 0]       # green
@@ -166,7 +168,7 @@ def aqi_to_color(aqi_val):
         return [128, 0, 128]     # purple
 
 karachi_stations["color"] = karachi_stations["AQI"].apply(aqi_to_color)
-karachi_stations["radius"] = karachi_stations["AQI"] * 400  # radius proportional to AQI
+karachi_stations["radius"] = karachi_stations["AQI"] * 100  # reduced radius for better visualization
 
 # PyDeck ScatterplotLayer
 layer = pdk.Layer(
@@ -187,18 +189,17 @@ view_state = pdk.ViewState(
     pitch=0
 )
 
-# Deck object with interactive tooltip
+# Deck object with tooltip (show only AQI number)
 r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     tooltip={
-        "html": "<b>{location}</b><br>AQI: {AQI}<br>Category: {AQI}",
-        "style": {"backgroundColor": "steelblue", "color": "white"}
+        "html": "<b>{location}</b><br>AQI: {AQI}",
+        "style": {"backgroundColor": "steelblue", "color": "white", "fontSize": "14px"}
     }
 )
 
 st.pydeck_chart(r)
-
 
 # --------------------------------------------------
 # Footer
