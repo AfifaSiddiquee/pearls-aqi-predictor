@@ -133,24 +133,36 @@ chart = (
 st.altair_chart(chart, use_container_width=True)
 
 # --------------------------------------------------
-# Health Advice (3-day)
+# ⚠️ AQI Alerts & Recommendations (All Levels)
 # --------------------------------------------------
-st.subheader("🩺 3-Day Health Recommendations")
+st.subheader("⚠️ AQI Alerts & Recommendations")
+st.markdown(
+    "<p style='font-size:15px; color:black;'>"
+    "Daily recommendations based on predicted AQI levels to help protect your health and plan activities."
+    "</p>",
+    unsafe_allow_html=True
+)
+
 for i, aqi_val in enumerate(aqi_display):
     category, color = get_aqi_category(aqi_val)
-    advice = {
-        "Good": "Air quality is satisfactory. Enjoy outdoor activities.",
-        "Fair": "Air quality is acceptable. Sensitive individuals should take caution.",
-        "Moderate": "Some pollution. Limit prolonged outdoor exertion.",
-        "Poor": "High pollution! Reduce outdoor activities.",
-        "Hazardous": "Very unhealthy. Avoid outdoor exposure."
-    }[category]
-    st.markdown(
-        f"**{future_dates[i].strftime('%A')}:** "
-        f"<span style='color:{color}'>{category}</span> – {advice}",
-        unsafe_allow_html=True
-    )
 
+    advice = {
+        1: "Air quality is excellent. Enjoy outdoor activities freely.",
+        2: "Air quality is fair. Sensitive individuals should take caution if outdoors for long periods.",
+        3: "Moderate pollution. Limit prolonged outdoor exertion, especially for sensitive groups.",
+        4: "High pollution! Reduce outdoor activities, wear masks if necessary.",
+        5: "Very unhealthy. Avoid outdoor exposure, stay indoors, use air purifiers, and follow health precautions."
+    }[aqi_val]
+
+    # Use different Streamlit elements for emphasis
+    if aqi_val == 1:
+        st.success(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
+    elif aqi_val == 2 or aqi_val == 3:
+        st.info(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
+    elif aqi_val == 4:
+        st.warning(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
+    else:  # 5
+        st.error(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
 # --------------------------------------------------
 # 🔍 Compact SHAP Analysis — Top 5 Features
 # --------------------------------------------------
@@ -363,38 +375,6 @@ r = pdk.Deck(
 )
 
 st.pydeck_chart(r)
-
-# --------------------------------------------------
-# ⚠️ AQI Alerts & Recommendations (All Levels)
-# --------------------------------------------------
-st.subheader("⚠️ AQI Alerts & Recommendations")
-st.markdown(
-    "<p style='font-size:15px; color:black;'>"
-    "Daily recommendations based on predicted AQI levels to help protect your health and plan activities."
-    "</p>",
-    unsafe_allow_html=True
-)
-
-for i, aqi_val in enumerate(aqi_display):
-    category, color = get_aqi_category(aqi_val)
-
-    advice = {
-        1: "Air quality is excellent. Enjoy outdoor activities freely.",
-        2: "Air quality is fair. Sensitive individuals should take caution if outdoors for long periods.",
-        3: "Moderate pollution. Limit prolonged outdoor exertion, especially for sensitive groups.",
-        4: "High pollution! Reduce outdoor activities, wear masks if necessary.",
-        5: "Very unhealthy. Avoid outdoor exposure, stay indoors, use air purifiers, and follow health precautions."
-    }[aqi_val]
-
-    # Use different Streamlit elements for emphasis
-    if aqi_val == 1:
-        st.success(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
-    elif aqi_val == 2 or aqi_val == 3:
-        st.info(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
-    elif aqi_val == 4:
-        st.warning(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
-    else:  # 5
-        st.error(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
 
 # --------------------------------------------------
 # Footer
