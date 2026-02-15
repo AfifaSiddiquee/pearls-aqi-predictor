@@ -153,7 +153,7 @@ pearls-aqi-predictor
 
 **Afifa Siddiquee**  
 ⚡ AI & Data Science Intern | Pearls AQI Predictor
-```
+
 
 
 
