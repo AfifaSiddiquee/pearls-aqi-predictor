@@ -125,30 +125,27 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🔍 SHAP Model Explanation
+# 🔍 Compact SHAP Model Explanation — Top 5 Features
 # --------------------------------------------------
-st.subheader("🔍 Model Explanation — SHAP Analysis")
+st.subheader("🔍 Model Explanation — Top Feature Contributions")
 
 with st.spinner("Computing model explanations..."):
     try:
-        st.markdown("### 📊 Global Feature Importance")
+        # Compute mean absolute SHAP values for each feature
+        shap_df = pd.DataFrame(np.abs(shap_vals.values), columns=future_features.columns)
+        mean_shap = shap_df.mean().sort_values(ascending=False).head(5)  # top 5 features
 
-        # Create small figure for SHAP
+        # Plot horizontal bar chart
         import matplotlib.pyplot as plt
-        plt.figure(figsize=(18, 1))  # width x height in inches
 
-        # SHAP summary_plot for bar chart
-        shap.summary_plot(
-            shap_vals,
-            future_features,
-            plot_type="bar",
-            show=False,
-            max_display=10,
-        )
-
+        fig, ax = plt.subplots(figsize=(8,2))  # compact figure
+        mean_shap.plot(kind="barh", ax=ax, color="green")
+        ax.set_xlabel("Mean |SHAP value|")
+        ax.set_title("Top 5 Feature Contributions")
+        plt.gca().invert_yaxis()  # highest on top
         plt.tight_layout()
-        st.pyplot(plt.gcf(), use_container_width=True)
-        plt.close()
+
+        st.pyplot(fig, use_container_width=True)
 
     except Exception as e:
         st.warning(f"SHAP explanation could not be generated: {e}")
