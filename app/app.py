@@ -122,7 +122,7 @@ for i, aqi_val in enumerate(aqi_display):
     )
 
 # --------------------------------------------------
-# 🧪 Live Pollutant Composition (Last 7 Days) with Percentages
+# 🧪 Live Pollutant Composition (Last 7 Days) with Percentages in Tooltip
 # --------------------------------------------------
 st.subheader("🧪 Live Pollutant Composition — Last 7 Days")
 
@@ -144,12 +144,7 @@ composition_df = pd.DataFrame({
     "Percentage": percentages.values
 })
 
-# Add combined label for display inside slice
-composition_df["label"] = composition_df.apply(
-    lambda x: f"{x['Pollutant']} ({x['Percentage']}%)", axis=1
-)
-
-# Altair Pie Chart (regular) with percentage in tooltip
+# Altair Pie Chart (regular) with percentage in tooltip only
 pollutant_pie = (
     alt.Chart(composition_df)
     .mark_arc()  # full pie
@@ -159,13 +154,13 @@ pollutant_pie = (
         tooltip=[
             alt.Tooltip("Pollutant:N"), 
             alt.Tooltip("Average Concentration:Q", format=".3f"),
-            alt.Tooltip("Percentage:Q", format=".2f")  # show percentage
+            alt.Tooltip("Percentage:Q", format=".2f")  # show percentage in tooltip
         ]
     )
     .properties(width=400, height=400)
 )
 
-st.altair_chart(pollutant_pie + labels, use_container_width=True)
+st.altair_chart(pollutant_pie, use_container_width=True)
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode) with day, date & month
