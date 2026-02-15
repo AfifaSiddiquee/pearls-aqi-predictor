@@ -133,27 +133,28 @@ last_7_days_df = fetch_last_n_days(7)
 pollutants = ["pm25", "pm10", "co", "no2", "so2", "o3"]
 avg_pollutants = last_7_days_df[pollutants].mean()
 
+# Round to 3 decimals
+avg_pollutants = avg_pollutants.round(3)
+
 # Create a dataframe suitable for pie chart
 composition_df = pd.DataFrame({
     "Pollutant": avg_pollutants.index,
     "Average Concentration": avg_pollutants.values
 })
 
-# Altair Pie Chart
+# Altair Pie Chart with decimals in tooltip
 pollutant_pie = (
     alt.Chart(composition_df)
     .mark_arc(innerRadius=50)  # donut-style chart
     .encode(
         theta=alt.Theta(field="Average Concentration", type="quantitative"),
         color=alt.Color(field="Pollutant", type="nominal", scale=alt.Scale(scheme="category10")),
-        tooltip=["Pollutant", "Average Concentration"]
+        tooltip=[alt.Tooltip("Pollutant:N"), alt.Tooltip("Average Concentration:Q", format=".3f")]
     )
     .properties(width=400, height=400)
 )
 
 st.altair_chart(pollutant_pie, use_container_width=True)
-
-
 
 
 # --------------------------------------------------
