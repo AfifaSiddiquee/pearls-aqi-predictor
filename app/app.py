@@ -135,7 +135,7 @@ with st.spinner("Computing model explanations..."):
         st.markdown("### 📊 Global Feature Importance")
 
         # Create smaller figure manually
-        plt.figure(figsize=(6, 3))  # width=6 inches, height=3 inches
+        plt.figure(figsize=(6, 2.5))  # smaller height
         shap.summary_plot(
             shap_vals,
             future_features,
@@ -145,18 +145,17 @@ with st.spinner("Computing model explanations..."):
         )
         plt.tight_layout()
 
-        # Save to buffer
+        # Grab current figure and save to buffer
         buf = io.BytesIO()
-        plt.savefig(buf, format="png", dpi=80)  # smaller dpi reduces size
+        plt.savefig(buf, format="png", dpi=70)  # lower dpi
         buf.seek(0)
-        plt.close()  # close figure to avoid overlap
+        plt.close()
 
-        # Display in Streamlit with automatic width
+        # Display resized figure in Streamlit
         st.image(buf, use_column_width=True)
 
     except Exception as e:
         st.warning(f"SHAP explanation could not be generated: {e}")
-
 
 
 # --------------------------------------------------
