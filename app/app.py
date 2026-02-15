@@ -365,35 +365,36 @@ r = pdk.Deck(
 st.pydeck_chart(r)
 
 # --------------------------------------------------
-# ⚠️ Alerts for Hazardous AQI Levels
+# ⚠️ AQI Alerts & Recommendations (All Levels)
 # --------------------------------------------------
-st.subheader("⚠️ AQI Alerts")
+st.subheader("⚠️ AQI Alerts & Recommendations")
 st.markdown(
     "<p style='font-size:15px; color:black;'>"
-    "The dashboard automatically highlights days with poor or hazardous air quality. Follow recommended precautions for these days."
+    "Daily recommendations based on predicted AQI levels to help protect your health and plan activities."
     "</p>",
     unsafe_allow_html=True
 )
 
 for i, aqi_val in enumerate(aqi_display):
     category, color = get_aqi_category(aqi_val)
-    
-    # Only trigger alert for AQI 4 (Poor) or 5 (Hazardous)
-    if aqi_val >= 4:
-        alert_message = f"""
-        **{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})**
-        
-        Recommended Actions:
-        - Limit outdoor activities.
-        - Keep windows and doors closed.
-        - Wear N95 masks if going outside.
-        - Use air purifiers indoors.
-        - Stay hydrated and monitor health symptoms.
-        """
-        if aqi_val == 4:
-            st.warning(alert_message)
-        else:  # AQI 5
-            st.error(alert_message)
+
+    advice = {
+        1: "Air quality is excellent. Enjoy outdoor activities freely.",
+        2: "Air quality is fair. Sensitive individuals should take caution if outdoors for long periods.",
+        3: "Moderate pollution. Limit prolonged outdoor exertion, especially for sensitive groups.",
+        4: "High pollution! Reduce outdoor activities, wear masks if necessary.",
+        5: "Very unhealthy. Avoid outdoor exposure, stay indoors, use air purifiers, and follow health precautions."
+    }[aqi_val]
+
+    # Use different Streamlit elements for emphasis
+    if aqi_val == 1:
+        st.success(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
+    elif aqi_val == 2 or aqi_val == 3:
+        st.info(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
+    elif aqi_val == 4:
+        st.warning(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
+    else:  # 5
+        st.error(f"**{future_dates[i].strftime('%A, %d %b %Y')}: {category} AQI ({aqi_val})** — {advice}")
 
 # --------------------------------------------------
 # Footer
