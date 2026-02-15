@@ -1,5 +1,6 @@
 import sys
 import os
+import io
 
 # Add repo root to sys.path so Python can find src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -133,20 +134,29 @@ with st.spinner("Computing model explanations..."):
     try:
         st.markdown("### 📊 Global Feature Importance")
 
-        # Set figure size (width x height in inches)
-        fig1, ax1 = plt.subplots(figsize=(4, 3))  # smaller and wide
+        # Create a smaller figure
+        fig1, ax1 = plt.subplots(figsize=(6, 3))  # smaller figure
         shap.summary_plot(
             shap_vals,
             future_features,
             plot_type="bar",
             show=False,
-            max_display=10  # show top 10 features only
+            max_display=10
         )
-        st.pyplot(fig1)
+
+        # Adjust layout to prevent huge margins
+        fig1.tight_layout()
+
+        # Save figure to buffer
+        buf = io.BytesIO()
+        fig1.savefig(buf, format="png", dpi=100)  # lower dpi to reduce size
+        buf.seek(0)
+
+        # Display in Streamlit
+        st.image(buf, use_column_width=True)
 
     except Exception as e:
         st.warning(f"SHAP explanation could not be generated: {e}")
-
 
 
 # --------------------------------------------------
