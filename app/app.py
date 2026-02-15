@@ -70,6 +70,7 @@ st.dataframe(
     height=150
 )
 
+
 # --------------------------------------------------
 # 3-day line chart
 # --------------------------------------------------
@@ -78,6 +79,27 @@ st.line_chart(pd.DataFrame({
     "Date": [d.strftime("%a") for d in future_dates],
     "AQI": aqi_display
 }).set_index("Date"))
+
+
+# --------------------------------------------------
+# Health Advice (3-day)
+# --------------------------------------------------
+st.subheader("🩺 3-Day Health Recommendations")
+for i, aqi_val in enumerate(aqi_display):
+    category, color = get_aqi_category(aqi_val)
+    advice = {
+        "Good": "Air quality is satisfactory. Enjoy outdoor activities.",
+        "Fair": "Air quality is acceptable. Sensitive individuals should take caution.",
+        "Moderate": "Some pollution. Limit prolonged outdoor exertion.",
+        "Poor": "High pollution! Reduce outdoor activities.",
+        "Hazardous": "Very unhealthy. Avoid outdoor exposure."
+    }[category]
+    st.markdown(
+        f"**{future_dates[i].strftime('%A')}:** "
+        f"<span style='color:{color}'>{category}</span> – {advice}",
+        unsafe_allow_html=True
+    )
+
 
 # --------------------------------------------------
 # 30-Day AQI Forecast (demo-mode)
@@ -98,24 +120,6 @@ forecast_30_df = pd.DataFrame({
 })
 st.line_chart(forecast_30_df.set_index("Date"))
 
-# --------------------------------------------------
-# Health Advice (3-day)
-# --------------------------------------------------
-st.subheader("🩺 3-Day Health Recommendations")
-for i, aqi_val in enumerate(aqi_display):
-    category, color = get_aqi_category(aqi_val)
-    advice = {
-        "Good": "Air quality is satisfactory. Enjoy outdoor activities.",
-        "Fair": "Air quality is acceptable. Sensitive individuals should take caution.",
-        "Moderate": "Some pollution. Limit prolonged outdoor exertion.",
-        "Poor": "High pollution! Reduce outdoor activities.",
-        "Hazardous": "Very unhealthy. Avoid outdoor exposure."
-    }[category]
-    st.markdown(
-        f"**{future_dates[i].strftime('%A')}:** "
-        f"<span style='color:{color}'>{category}</span> – {advice}",
-        unsafe_allow_html=True
-    )
 
 # --------------------------------------------------
 # Footer
