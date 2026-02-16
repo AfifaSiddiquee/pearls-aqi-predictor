@@ -65,7 +65,7 @@ def run_feature_pipeline():
     df_latest["month"] = df_latest["timestamp"].dt.month
     df_latest["weekday"] = df_latest["timestamp"].dt.weekday
 
-    fg.insert(df_latest, write_options={"wait_for_job": True})
+    fg.insert(df_latest)
     print("Latest data appended to feature group.")
 
 
