@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 * * * *"   # runs every hour
   workflow_dispatch:
 
 jobs:
@@ -13,24 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repo
       - uses: actions/checkout@v3
 
+      # 2️⃣ Setup Python
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements_pipeline.txt
           pip install -r requirements.txt
           pip install hopsworks==4.2.* hsml
 
+      # 4️⃣ Run the feature pipeline
       - name: Run feature pipeline
         env:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
           PYTHONPATH: ${{ github.workspace }}
-          HOPSWORKS_HOST: "https://eu-west.cloud.hopsworks.ai"
+          HOPSWORKS_HOST: "eu-west.cloud.hopsworks.ai"
         run: python -u pipelines/feature_pipeline.py
