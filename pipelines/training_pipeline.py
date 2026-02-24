@@ -25,7 +25,9 @@ def evaluate(y_true, y_pred):
 
 def run_training_pipeline():
     # 1️⃣ Connect to Hopsworks
-    project = hopsworks.login(api_key_value=os.getenv("HOPSWORKS_API_KEY"))
+    project = hopsworks.login(
+    api_key_value=os.environ["HOPSWORKS_API_KEY"],
+    host="https://run.hopsworks.ai")
     fs = project.get_feature_store()
 
     fg = fs.get_feature_group("karachi_aqi_features", version=1)
