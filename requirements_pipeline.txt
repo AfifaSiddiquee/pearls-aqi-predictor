@@ -9,6 +9,7 @@ tensorflow==2.15.0
 hopsworks==4.2.*
 confluent-kafka
 xgboost
+setuptools
 
 
 
