@@ -29,13 +29,14 @@ def safe_insert(fg, df, label="data"):
 def run_feature_pipeline():
 
     # 1️⃣ Connect to Hopsworks feature store only
-    print("Connecting to Hopsworks...")
-    # Use old 4.x login
+    print("Connecting to Hopsworks (HSFS only)...")
     project = hopsworks.login(
         api_key_value=os.environ["HOPSWORKS_API_KEY"],
-        host="eu-west.cloud.hopsworks.ai"
+        host=os.environ.get("HOPSWORKS_HOST"),
+        project="Predictor_AQI",
+        enable_model_serving=False   # HSFS only, disables model serving
     )
-
+    
     # Directly get the feature store (skip model serving entirely)
     fs = project.get_feature_store()
 
