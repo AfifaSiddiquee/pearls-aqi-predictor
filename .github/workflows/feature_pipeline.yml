@@ -28,7 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements_pipeline.txt
           pip install -r requirements.txt
-          pip install hopsworks==4.2.* hsml
+          pip install hopsworks==4.2.*
 
       # 4️⃣ Run the feature pipeline
       - name: Run feature pipeline
@@ -36,5 +36,4 @@ jobs:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
           PYTHONPATH: ${{ github.workspace }}
-          HOPSWORKS_HOST: "eu-west.cloud.hopsworks.ai"
         run: python -u pipelines/feature_pipeline.py
