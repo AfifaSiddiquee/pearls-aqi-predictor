@@ -42,6 +42,7 @@ def run_feature_pipeline():
     project = hopsworks.login(
     api_key_value=os.environ["HOPSWORKS_API_KEY"],
     host="eu-west.cloud.hopsworks.ai",
+    disable_model_serving=True,
     project="Predictor_AQI"  # explicitly your project
     )
     fs = project.get_feature_store()
